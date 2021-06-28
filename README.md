@@ -1,8 +1,10 @@
 # 🔥 React ChatApp with Firebase 🔥
 
+👏 7월 Intensive Client Bootcamp + 멘토링 by Ringle 👏
+
 ## Week 1️⃣
 
-React를 알아가는 단계로, 기본적인 react basic과 state, firebase를 이용해 Login, Signup 한 뒤 deploy까지 해보기.
+`React`를 알아가는 단계로, 기본적인 `react basic`과 `state`, `firebase`를 이용해 `Login`, `Signup` 한 뒤 `deploy`까지 해보기.
 
 🏆 Challenge
 
