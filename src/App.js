@@ -3,15 +3,17 @@ import React, { useState } from "react";
 const App = () => {
 	const [person, setPerson] = useState({
 		email: "",
-		pw: "",
+		password: "",
 		nickName: "",
 		isAgreeInfo: false,
 		signupPath: "",
 		sex: "male",
 	});
 
-	const onInfoChange = (person) => {
-		setPerson({ ...person });
+	const onInfoChange = (e, key) => {
+		const cp = { ...person };
+		cp[key] = e.target.value;
+		setPerson(cp);
 	};
 
 	// 정보 제출
@@ -36,7 +38,7 @@ const App = () => {
 			/^([0-9a-zA-Z_\.-]+)@([0-9a-zA-Z_-]+)(\.[0-9a-zA-Z_-]+){1,2}$/;
 		if (!reg_email.test(person.email)) {
 			alert("이메일은 ~@~ 형식을 맞춰주세요!");
-		} else if (person.pw.length < 6) {
+		} else if (person.password.length < 6) {
 			alert("패스워드는 7자 이상 입력해주세요.");
 		} else {
 			alert("제출 완료");
@@ -52,16 +54,16 @@ const App = () => {
 				<span>아이디 : </span>
 				<input
 					value={person.email}
-					onChange={(e) => onInfoChange({ ...person, email: e.target.value })}
+					onChange={(e) => onInfoChange(e, "email")}
 					placeholder="이메일을 입력하세요"
 				/>
 			</div>
 			<div>
 				<span>패스워드 : </span>
 				<input
-					value={person.pw}
+					value={person.password}
 					type="password"
-					onChange={(e) => onInfoChange({ ...person, pw: e.target.value })}
+					onChange={(e) => onInfoChange(e, "password")}
 					placeholder="비밀번호를 입력하세요"
 				/>
 			</div>
@@ -69,9 +71,7 @@ const App = () => {
 				<span>닉네임 : </span>
 				<input
 					value={person.nickName}
-					onChange={(e) =>
-						onInfoChange({ ...person, nickName: e.target.value })
-					}
+					onChange={(e) => onInfoChange(e, "nickName")}
 					placeholder="닉네임을 입력하세요"
 				/>
 			</div>
@@ -80,18 +80,14 @@ const App = () => {
 				<input
 					checked={person.isAgreeInfo}
 					type="checkbox"
-					onChange={(e) =>
-						onInfoChange({ ...person, isAgreeInfo: !person.isAgreeInfo })
-					}
+					onChange={(e) => onInfoChange(e, "isAgreeInfo")}
 				/>
 			</div>
 			<div>
 				<span>가입 경로 : </span>
 				<select
 					value={person.signupPath}
-					onChange={(e) =>
-						onInfoChange({ ...person, signupPath: e.target.value })
-					}
+					onChange={(e) => onInfoChange(e, "signupPath")}
 				>
 					<option value={"search"}>검색</option>
 					<option value={"ads"}>광고</option>
@@ -106,14 +102,14 @@ const App = () => {
 					type="radio"
 					value="male"
 					checked={person.sex === "male"}
-					onClick={(e) => onInfoChange({ ...person, sex: e.target.value })}
+					onClick={(e) => onInfoChange(e, "sex")}
 				/>
 				<span>여 </span>
 				<input
 					type="radio"
 					value="female"
 					checked={person.sex === "female"}
-					onClick={(e) => onInfoChange({ ...person, sex: e.target.value })}
+					onClick={(e) => onInfoChange(e, "sex")}
 				/>
 			</div>
 			<button onClick={submit}>제출</button>
