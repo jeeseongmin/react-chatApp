@@ -9,24 +9,58 @@ import { v4 as uuidv4 } from "uuid";
 
 const ChatRoom = () => {
 	const uid = useSelector((state) => state.user.uuid);
+	const history = useHistory();
 	const { roomId } = useParams();
 	const _roomId = "room_" + roomId;
 	const [roomInfo, setRoomInfo] = useState({});
-	const [chats, setChats] = useState({});
 	const [text, setText] = useState("");
-	const [modifyCandidate, setModifyCandidate] = useState(null);
-	const [newCandidate, setNewCandidate] = useState(null);
+	// const [chats, setChats] = useState({});
+	// const [modifyCandidate, setModifyCandidate] = useState(null);
+	// const [newCandidate, setNewCandidate] = useState(null);
 
+	// useEffect(() => {
+	// 	const cp = [...chats];
+	// 	cp.push(modifyCandidate);
+	// 	setChats(cp);
+	// }, [newCandidate]);
+	// const history = useHistory();
+
+	// 맨 처음에 정보들 받아올 때.
 	useEffect(() => {
-		const cp = [...chats];
-		cp.push(modifyCandidate);
-		setChats(cp);
-	}, [newCandidate]);
-	const history = useHistory();
+		const chatroomsRef = db
+			.collection("chatrooms")
+			.doc(_roomId)
+			.get()
+			.then((doc) => {
+				if (doc.data()) {
+					const hostEmail = doc
+						.data()
+						.host.slice(0, doc.data().host.indexOf("@"));
+					setRoomInfo({
+						roomId: doc.data().roomId,
+						title: doc.data().title,
+						password: doc.data().password,
+						id: doc.data().id,
+						host: hostEmail,
+					});
+				} else {
+					alert("없습니다.");
+				}
+			})
+			.catch((error) => {
+				alert("데이터베이스 오류");
+			});
+	}, []);
 
 	const goBack = () => {
 		history.goBack();
 	};
+
+	/* 
+		message를 보내면, chats 이라는 collection에 추가하고, 
+		_roomId를 가지는 chatrooms의 message에도 추가한다.
+	
+	*/
 
 	const sendMessage = () => {
 		const payload = {
@@ -44,75 +78,48 @@ const ChatRoom = () => {
 			});
 	};
 
-	useEffect(() => {
-		const chatRef = db
-			.collection("chatrooms")
-			.doc(_roomId)
-			.collection("messages");
-		chatRef.orderBy("created").onSnapshot((snapshot) => {
-			snapshot.docChanges().forEach((change) => {
-				if (change.type === "added") {
-					const newEntry = change.doc.data();
-					newEntry.id = change.doc.id;
-					setModifyCandidate(newEntry);
-				}
-				if (change.type === "modified") {
-					const data = change.doc.data();
-					data.id = change.doc.id;
-					setModifyCandidate(data);
-				}
-				if (change.type === "removed") {
-					console.log("remove message: ", changed.doc.data());
-				}
-			});
-		});
-	}, []);
+	// useEffect(() => {
+	// 	const chatRef = db
+	// 		.collection("chatrooms")
+	// 		.doc(_roomId)
+	// 		.collection("messages");
+	// 	chatRef.orderBy("created").onSnapshot((snapshot) => {
+	// 		snapshot.docChanges().forEach((change) => {
+	// 			if (change.type === "added") {
+	// 				const newEntry = change.doc.data();
+	// 				newEntry.id = change.doc.id;
+	// 				setModifyCandidate(newEntry);
+	// 			}
+	// 			if (change.type === "modified") {
+	// 				const data = change.doc.data();
+	// 				data.id = change.doc.id;
+	// 				setModifyCandidate(data);
+	// 			}
+	// 			if (change.type === "removed") {
+	// 				console.log("remove message: ", change.doc.data());
+	// 			}
+	// 		});
+	// 	});
+	// }, []);
 
-	useEffect(() => {
-		const chatroomsRef = db
-			.collection("chatrooms")
-			.doc(_roomId)
-			.get()
-			.then((doc) => {
-				if (doc.data()) {
-					const hostEmail = doc
-						.data()
-						.host.slice(0, doc.data().host.indexOf("@"));
+	// useEffect(() => {
+	// 	const messageRef = db
+	// 		.collection("chatrooms")
+	// 		.doc(_roomId)
+	// 		.collection("messages");
 
-					setRoomInfo({
-						roomId: doc.data().roomId,
-						title: doc.data().title,
-						password: doc.data().password,
-						id: doc.data().id,
-						host: hostEmail,
-					});
-				} else {
-					alert("없습니다.");
-				}
-			})
-			.catch((error) => {
-				alert("데이터베이스 오류");
-			});
-	}, []);
-
-	useEffect(() => {
-		const messageRef = db
-			.collection("chatrooms")
-			.doc(_roomId)
-			.collection("messages");
-
-		messageRef
-			.orderBy("created")
-			.get()
-			.then((snapshot) => {
-				const data = snapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-				}));
-				setChats(data);
-				console.log(data);
-			});
-	}, []);
+	// 	messageRef
+	// 		.orderBy("created")
+	// 		.get()
+	// 		.then((snapshot) => {
+	// 			const data = snapshot.docs.map((doc) => ({
+	// 				id: doc.id,
+	// 				...doc.data(),
+	// 			}));
+	// 			setChats(data);
+	// 			console.log(data);
+	// 		});
+	// }, []);
 
 	//...
 	return (

@@ -87,6 +87,7 @@ const ChatList = () => {
 								password: password.value,
 								id: uuidv4(),
 								host: email,
+								messages: {},
 							})
 							.then((e) => {
 								console.log("Document successfully written!");
