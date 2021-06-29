@@ -3,6 +3,7 @@ export const SET_USER_PROFILE = "SET_USER_PROFILE";
 export const SECOND_SAGA = "SECOND_SAGA";
 export const SET_EMAIL = "SET_EMAIL";
 export const SET_PASSWORD = "SET_PASSWORD";
+export const SET_UUID = "SET_UUID";
 
 export const setJwtToken = (jwtToken) => ({
 	type: SET_JWT_TOKEN,
@@ -24,12 +25,18 @@ export const setPassword = (password) => ({
 	payload: password,
 });
 
+export const setUuid = (uuid) => ({
+	type: SET_UUID,
+	payload: uuid,
+});
+
 const initialState = {
 	jwtToken: null,
 	userProfile: null,
 	message: "",
 	email: "",
 	password: "",
+	uuid: "",
 };
 
 const user = (state = initialState, action) => {
@@ -65,6 +72,12 @@ const user = (state = initialState, action) => {
 			return {
 				...state,
 				password: action.payload,
+			};
+		}
+		case SET_UUID: {
+			return {
+				...state,
+				uuid: action.payload,
 			};
 		}
 		default:

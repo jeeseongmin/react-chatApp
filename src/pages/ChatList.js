@@ -8,7 +8,6 @@ import { Button, Card } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../chatting.css";
 import { useSelector } from "react-redux";
-import ChatList2 from "./ChatList2";
 
 const ChatList = () => {
 	const email = useSelector((state) => state.user.email);
@@ -87,6 +86,7 @@ const ChatList = () => {
 								title: title.value,
 								password: password.value,
 								id: uuidv4(),
+								host: email,
 							})
 							.then((e) => {
 								console.log("Document successfully written!");
@@ -162,7 +162,6 @@ const ChatList = () => {
 				</form>
 			</div>
 			<div className="cardWrapper">{ChattingList}</div>
-			{/* <ChatList2 component={chatrooms} /> */}
 		</div>
 	);
 };

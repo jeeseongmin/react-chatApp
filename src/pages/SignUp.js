@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { db, firebaseApp, firebase } from "../firebase";
+import { v4 as uuidv4 } from "uuid";
 
 const SignUp = () => {
 	const history = useHistory();
@@ -15,6 +16,12 @@ const SignUp = () => {
 			.then((user) => {
 				const uid = (firebaseApp.auth().currentUser || {}).uid;
 				if (uid) {
+					const uuid = uuidv4();
+					db.collection("user").doc(email.value).set({
+						email: email.value,
+						password: password.value,
+						uid: uuid,
+					});
 					alert("회원가입되었습니다.");
 					history.push("/");
 				} else {

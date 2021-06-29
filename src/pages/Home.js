@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setJwtToken, setEmail, setPassword } from "../reducers/user";
+import { setJwtToken, setEmail, setPassword, setUuid } from "../reducers/user";
 import { Link, useHistory } from "react-router-dom";
 import { firebaseApp } from "../firebase";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -32,8 +32,6 @@ const Home = () => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		const [email, password] = e.target.elements;
-		console.log(email.value);
-		console.log(password.value);
 		firebaseApp
 			.auth()
 			.signInWithEmailAndPassword(email.value, password.value)
@@ -41,9 +39,10 @@ const Home = () => {
 				const uid = (firebaseApp.auth().currentUser || {}).uid;
 				if (uid) {
 					alert("로그인되었습니다.");
-					history.push("/chat/list");
 					dispatch(setEmail(email.value));
 					dispatch(setPassword(password.value));
+					dispatch(setUuid(uid));
+					history.push("/chat/list");
 				} else {
 					alert("error");
 				}
