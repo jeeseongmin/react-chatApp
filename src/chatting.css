@@ -1,0 +1,30 @@
+.cardWrapper {
+	display: flex;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+}
+
+.cardComponent {
+	flex: 1 1 30%;
+}
+
+.buttonWrapper {
+	display: flex;
+	justify-content: flex-start;
+}
+.formWrapper {
+	display: flex;
+	justify-content: flex-start;
+	margin-bottom: 3rem;
+}
+.formWrapper div {
+	margin-right: 1rem;
+}
+
+.header {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 2rem;
+}
