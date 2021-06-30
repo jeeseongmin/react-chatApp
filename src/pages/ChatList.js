@@ -28,6 +28,7 @@ const ChatList = () => {
 		setInputValue(cp);
 	};
 	useEffect(() => {
+		console.log("upload");
 		db.collection("chatrooms")
 			.get()
 			.then((querySnapshot) => {
@@ -35,10 +36,46 @@ const ChatList = () => {
 			});
 	}, []);
 
+	const deleteRoom = (e) => {
+		const deleteId = e.target.value;
+		db.collection("chatrooms")
+			.doc("room_" + deleteId)
+			.get()
+			.then((doc) => {
+				const deletePassword = doc.data().password;
+				if (email === doc.data().host) {
+					console.log(deletePassword);
+					const answer = prompt("비밀번호를 입력해주세요.");
+					if (answer === deletePassword) {
+						db.collection("chatrooms")
+							.doc("room_" + deleteId)
+							.delete();
+						alert("삭제되었습니다.");
+					} else {
+						alert("비밀번호가 틀렸습니다.");
+					}
+				} else {
+					alert("작성자만 삭제할 수 있습니다.");
+				}
+			});
+	};
+	function loadList(props) {
+		console.log("rendering components");
+		console.log(props);
+		return (
+			<div>
+				<h1>haha</h1>
+			</div>
+		);
+	}
+
 	const ChattingList = chatrooms.map((chatroom, index) => (
 		<Card style={{ width: "18rem" }} className="cardComponent">
 			<Card.Body>
-				<Card.Title>{chatroom.title}</Card.Title>
+				<Card.Title>
+					{chatroom.host.slice(0, chatroom.host.indexOf("@"))}님의 <br></br>
+					{chatroom.title}
+				</Card.Title>
 				<div className="buttonWrapper">
 					<Button
 						variant="primary"
@@ -49,15 +86,13 @@ const ChatList = () => {
 					>
 						입장
 					</Button>
-					<Button variant="danger">삭제</Button>
+					<Button variant="danger" value={chatroom.roomId} onClick={deleteRoom}>
+						삭제
+					</Button>
 				</div>
 			</Card.Body>
 		</Card>
 	));
-
-	useEffect(() => {
-		console.log("re-rendering");
-	}, [chatrooms]);
 
 	const history = useHistory();
 	const logOut = () => {
@@ -79,17 +114,29 @@ const ChatList = () => {
 					if (doc.data()) {
 						alert("해당 번호로 등록된 채팅방이 있습니다.");
 					} else {
+						const payload = {
+							roomId: roomId.value,
+							title: title.value,
+							password: password.value,
+							id: uuidv4(),
+							host: email,
+							messages: {},
+						};
+
 						db.collection("chatrooms")
 							.doc("room_" + roomId.value)
 							.set({
-								roomId: roomId.value,
-								title: title.value,
-								password: password.value,
-								id: uuidv4(),
-								host: email,
+								roomId: payload.roomId,
+								title: payload.title,
+								password: payload.password,
+								id: payload.id,
+								host: payload.host,
 								messages: {},
 							})
 							.then((e) => {
+								const cp = [...chatrooms];
+								cp.push(payload);
+								setChatrooms(cp);
 								console.log("Document successfully written!");
 								alert("방이 생성되었습니다!");
 								setInputValue({

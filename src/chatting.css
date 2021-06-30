@@ -38,9 +38,11 @@
 }
 
 .chat-area {
+	width: 100%;
 	border: 1px solid #e3e3e3;
 	border-radius: 20px;
 	height: 35rem;
+	overflow: auto;
 }
 
 .inputMessage {
@@ -56,4 +58,19 @@
 }
 .sendBtn {
 	width: 5%;
+}
+
+.chatBox {
+	width: 100%;
+	border: 1px solid #e3e3e3;
+	border-radius: 15px;
+	height: 5rem;
+	display: flex;
+	align-items: center;
+}
+.myChat {
+	justify-content: flex-end;
+}
+.otherChat {
+	justify-content: flex-start;
 }

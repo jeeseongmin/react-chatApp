@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { db, firebase, firebaseApp } from "../firebase";
 import { Button, Card, Badge } from "react-bootstrap";
@@ -9,26 +9,21 @@ import { v4 as uuidv4 } from "uuid";
 
 const ChatRoom = () => {
 	const uid = useSelector((state) => state.user.uuid);
+	const chatBox = useRef(null);
 	const history = useHistory();
 	const { roomId } = useParams();
 	const _roomId = "room_" + roomId;
 	const [roomInfo, setRoomInfo] = useState({});
-	const [text, setText] = useState("");
-	// const [chats, setChats] = useState({});
-	// const [modifyCandidate, setModifyCandidate] = useState(null);
-	// const [newCandidate, setNewCandidate] = useState(null);
 
-	// useEffect(() => {
-	// 	const cp = [...chats];
-	// 	cp.push(modifyCandidate);
-	// 	setChats(cp);
-	// }, [newCandidate]);
-	// const history = useHistory();
+	const [text, setText] = useState("");
+	// 현재 room의 모든 chatting
+	const [chats, setChats] = useState([]);
+	const [modifyCandidate, setModifyCandidate] = useState(null);
+	const [newCandidate, setNewCandidate] = useState(null);
 
 	// 맨 처음에 정보들 받아올 때.
 	useEffect(() => {
-		const chatroomsRef = db
-			.collection("chatrooms")
+		db.collection("chatrooms")
 			.doc(_roomId)
 			.get()
 			.then((doc) => {
@@ -56,6 +51,12 @@ const ChatRoom = () => {
 		history.goBack();
 	};
 
+	const scrollToBottom = () => {
+		// console.log('box: ', box);
+		const { scrollHeight, clientHeight, scrollTop } = chatBox.current;
+		console.log(scrollHeight, clientHeight, scrollTop);
+		chatBox.current.scrollTop = scrollHeight - clientHeight;
+	};
 	/* 
 		message를 보내면, chats 이라는 collection에 추가하고, 
 		_roomId를 가지는 chatrooms의 message에도 추가한다.
@@ -69,14 +70,70 @@ const ChatRoom = () => {
 			uid: uuidv4(),
 			created: firebase.firestore.Timestamp.now().seconds,
 		};
-
-		db.collection("chats")
+		/* 
+			예제에서는 이 부분이 없어서 생각해보다가 
+			각 chatroom에 messages라는 collection을 만드는 것이 맞다고 생각했다.
+		*/
+		db.collection("chatrooms")
+			.doc(_roomId)
+			.collection("messages")
 			.add(payload)
 			.then((ref) => {
-				console.log(ref);
 				setText("");
+				const cp = [...chats];
+				cp.push(payload);
+				setChats(cp);
+				scrollToBottom();
 			});
 	};
+
+	useEffect(() => {
+		const cp = [...chats];
+		cp.push(newCandidate);
+		setChats(cp);
+		// scrollToBottom();
+	}, [newCandidate]);
+
+	useEffect(() => {
+		// 초기화를 해줘야 쌓이지 않는다.
+		// setChats([]);
+		const chatRef = db
+			.collection("chatrooms")
+			.doc(_roomId)
+			.collection("messages");
+		chatRef
+			.orderBy("created")
+			.get()
+			.then((snapshot) => {
+				// 이렇게 특정 change type으로 나누는 이유가 무엇일까?
+				snapshot.docChanges().forEach((change) => {
+					// 새로운 data일 때
+					if (change.type === "added") {
+						const newEntry = change.doc.data();
+						newEntry.id = change.doc.id;
+						setNewCandidate(newEntry);
+					}
+					// 수정된 data일 때
+					if (change.type === "modified") {
+						const data = change.doc.data();
+						data.id = change.doc.id;
+						setModifyCandidate(data);
+					}
+					// 제거된 data일 때
+					if (change.type === "removed") {
+						console.log("remove message: ", change.doc.data());
+					}
+					scrollToBottom();
+				});
+			});
+	}, []);
+
+	// useEffect(() => {
+	// 	const cp = [...chats];
+	// 	const index = cp.findIndex((el) => el.uid === modifyCandidate.uid);
+	// 	cp[index] = modifyCandidate;
+	// 	setChats(cp);
+	// }, [modifyCandidate]);
 
 	// useEffect(() => {
 	// 	const chatRef = db
@@ -121,14 +178,34 @@ const ChatRoom = () => {
 	// 		});
 	// }, []);
 
-	//...
+	const chatHistory = chats.map((chat, index) => {
+		if (index !== 0) {
+			if (chat.uidOfUser === uid) {
+				return (
+					<div className="chatBox myChat">
+						<div className="">{chat.content}</div>
+					</div>
+				);
+			} else if (chat.uidOfUser !== uid) {
+				return (
+					<div className="chatBox otherChat">
+						<div className=""></div>
+						<div className="">{chat.content}</div>
+					</div>
+				);
+			}
+		}
+	});
+
 	return (
 		<div className="chatRoomWrapper">
 			<h1>
 				{roomInfo.title} <Badge variant="primary">{roomInfo.roomId}</Badge>
 			</h1>
 			<h3>호스트 : {roomInfo.host}</h3>
-			<div className="chat-area"></div>
+			<div className="chat-area" ref={chatBox}>
+				{chatHistory}
+			</div>
 			<div className="sendMessageWrapper">
 				<input
 					type="text"
