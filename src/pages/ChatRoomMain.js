@@ -8,12 +8,12 @@ import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import Chat from "../components/Chat";
 
-const ChatRoom = () => {
-	const uid = useSelector((state) => state.user.uuid);
+const ChatRoomMain = () => {
+	const uid = useSelector((state) => state.user.uid);
 	const chatBox = useRef(null);
 	const history = useHistory();
-	const { roomId } = useParams();
-	const _roomId = "room_" + roomId;
+	const { rid } = useParams();
+	// const _roomId = "room_" + roomId;
 	const [roomInfo, setRoomInfo] = useState({});
 
 	const [text, setText] = useState("");
@@ -25,22 +25,24 @@ const ChatRoom = () => {
 	// 맨 처음에 정보들 받아올 때.
 	useEffect(() => {
 		db.collection("chatrooms")
-			.doc(_roomId)
+			.doc(rid)
 			.get()
 			.then((doc) => {
 				if (doc.data()) {
 					const hostEmail = doc
 						.data()
 						.host.slice(0, doc.data().host.indexOf("@"));
+					// 해당 방의 정보 임시저장.
 					setRoomInfo({
-						roomId: doc.data().roomId,
 						title: doc.data().title,
 						password: doc.data().password,
 						id: doc.data().id,
+						// 만든 사람
+						uidOfUser: doc.data().uidOfUser,
 						host: hostEmail,
 					});
 				} else {
-					alert("없습니다.");
+					alert("방을 찾을 수 없습니다.");
 				}
 			})
 			.catch((error) => {
@@ -63,20 +65,22 @@ const ChatRoom = () => {
 	
 	*/
 
+	// 메시지를 보내는 함수.
 	const sendMessage = () => {
 		console.log("send message");
 		const payload = {
 			uidOfUser: uid,
 			content: text,
-			uid: uuidv4(),
+			id: uuidv4(),
 			created: firebase.firestore.Timestamp.now().seconds,
 		};
+		console.log(payload);
 		/* 
 			예제에서는 이 부분이 없어서 생각해보다가 
 			각 chatroom에 messages라는 collection을 만드는 것이 맞다고 생각했다.
 		*/
 		db.collection("chatrooms")
-			.doc(_roomId)
+			.doc(rid)
 			.collection("messages")
 			.add(payload)
 			.then((ref) => {
@@ -98,10 +102,7 @@ const ChatRoom = () => {
 	useEffect(() => {
 		// 초기화를 해줘야 쌓이지 않는다.
 		// setChats([]);
-		const chatRef = db
-			.collection("chatrooms")
-			.doc(_roomId)
-			.collection("messages");
+		const chatRef = db.collection("chatrooms").doc(rid).collection("messages");
 		chatRef
 			.orderBy("created")
 			.get()
@@ -204,19 +205,25 @@ const ChatRoom = () => {
 	// });
 
 	return (
-		<div className="chatRoomWrapper">
+		<div className="chatRoomMainWrapper">
+			<div className="backWrapper">
+				<Button variant="secondary" onClick={goBack}>
+					Back
+				</Button>
+			</div>
 			<h1>
-				{roomInfo.title} <Badge variant="primary">{roomInfo.roomId}</Badge>
+				{roomInfo.title} <Badge variant="primary">On</Badge>
 			</h1>
 			<h3>호스트 : {roomInfo.host}</h3>
 			<div className="chat-area" ref={chatBox}>
 				{/* {chatHistory} */}
 				{chats.map((chat, index) => {
 					if (index !== 0) {
-						return <Chat chat={chat} key={chat.uid} uid={uid} />;
+						return <Chat chat={chat} key={chat.id} uid={uid} />;
 					}
 				})}
 			</div>
+
 			<div className="sendMessageWrapper">
 				<input
 					type="text"
@@ -229,11 +236,8 @@ const ChatRoom = () => {
 					전송
 				</Button>
 			</div>
-			<Button variant="secondary" onClick={goBack}>
-				뒤로가기
-			</Button>
 		</div>
 	);
 };
 
-export default ChatRoom;
+export default ChatRoomMain;

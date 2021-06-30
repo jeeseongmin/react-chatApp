@@ -4,23 +4,23 @@ import ReactDOM from "react-dom";
 import { useHistory } from "react-router-dom";
 import { db, firebaseApp, firebase } from "../firebase";
 import { v4 as uuidv4 } from "uuid";
-import { Button, Card, Badge } from "react-bootstrap";
+import { Button, Badge } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../chatting.css";
 import { useSelector } from "react-redux";
+import ChatRoom from "../components/ChatRoom";
 
-const ChatList = () => {
+const ChatMain = () => {
 	const email = useSelector((state) => state.user.email);
+	const uid = useSelector((state) => state.user.uid);
+
+	const history = useHistory();
 	const [chatrooms, setChatrooms] = useState([]);
 	const [inputValue, setInputValue] = useState({
 		roomId: "",
 		title: "",
 		password: "",
 	});
-
-	const enterChatRoom = (chatroom) => {
-		history.push("/chat/room/" + chatroom.roomId);
-	};
 
 	const onInfoChange = (e, key) => {
 		const cp = { ...inputValue };
@@ -36,109 +36,43 @@ const ChatList = () => {
 			});
 	}, []);
 
-	const deleteRoom = (e) => {
-		const deleteId = e.target.value;
-		db.collection("chatrooms")
-			.doc("room_" + deleteId)
-			.get()
-			.then((doc) => {
-				const deletePassword = doc.data().password;
-				if (email === doc.data().host) {
-					console.log(deletePassword);
-					const answer = prompt("비밀번호를 입력해주세요.");
-					if (answer === deletePassword) {
-						db.collection("chatrooms")
-							.doc("room_" + deleteId)
-							.delete();
-						alert("삭제되었습니다.");
-					} else {
-						alert("비밀번호가 틀렸습니다.");
-					}
-				} else {
-					alert("작성자만 삭제할 수 있습니다.");
-				}
-			});
-	};
-	function loadList(props) {
-		console.log("rendering components");
-		console.log(props);
-		return (
-			<div>
-				<h1>haha</h1>
-			</div>
-		);
-	}
-
-	const ChattingList = chatrooms.map((chatroom, index) => (
-		<div className="chatroom">
-			<Badge variant="success" className="idBadge">
-				{chatroom.roomId}
-			</Badge>
-			<div className="">
-				<h4>{chatroom.title}</h4>
-			</div>
-			<div className="">
-				{chatroom.host.slice(0, chatroom.host.indexOf("@"))}님의 채팅방
-			</div>
-			<div className="btnWrapper">
-				<Button
-					variant="primary"
-					onClick={(e) => {
-						enterChatRoom(chatroom);
-					}}
-					className="enterBtn"
-					key={index}
-				>
-					입장
-				</Button>
-				<Button
-					variant="danger"
-					className="deleteBtn"
-					value={chatroom.roomId}
-					onClick={deleteRoom}
-				>
-					삭제
-				</Button>
-			</div>
-		</div>
-	));
-
-	const history = useHistory();
 	const logOut = () => {
 		firebaseApp.auth().signOut();
 		alert("로그아웃 되었습니다.");
 		history.push("/");
 	};
 
-	// 아무 chatRooms도 없을 때부터 추가하면서 시작하고 싶다.
-	//
+	// 새로운 room을 생성한다.
 	const addRoom = (e) => {
 		e.preventDefault();
-		const { roomId, title, password } = e.target.elements;
-		if (roomId.value && title.value && password.value) {
+		const { title, password } = e.target.elements;
+		if (title.value && password.value) {
+			const rid = uuidv4();
 			db.collection("chatrooms")
-				.doc("room_" + roomId.value)
+				.doc(rid)
 				.get()
 				.then((doc) => {
 					if (doc.data()) {
 						alert("해당 번호로 등록된 채팅방이 있습니다.");
 					} else {
 						const payload = {
-							roomId: roomId.value,
 							title: title.value,
 							password: password.value,
-							id: uuidv4(),
+							id: rid,
+							// room 만든 사람
+							uidOfUser: uid,
+							// 그냥 편의로 만든 host.
 							host: email,
 							messages: {},
 						};
-
+						// 해당 id의 방이 없으므로 생성
 						db.collection("chatrooms")
-							.doc("room_" + roomId.value)
+							.doc(rid)
 							.set({
-								roomId: payload.roomId,
 								title: payload.title,
 								password: payload.password,
 								id: payload.id,
+								uidOfUser: uid,
 								host: payload.host,
 								messages: {},
 							})
@@ -149,13 +83,11 @@ const ChatList = () => {
 								console.log("Document successfully written!");
 								alert("방이 생성되었습니다!");
 								setInputValue({
-									roomId: "",
 									title: "",
 									password: "",
 								});
 							})
 							.catch((error) => {
-								alert("haha");
 								console.error("Error writing document: ", error);
 							});
 					}
@@ -183,7 +115,7 @@ const ChatList = () => {
 			<div>
 				<form onSubmit={addRoom} className="formWrapper">
 					<div>채팅방 새로 만들기 - </div>
-					<div>
+					{/* <div>
 						<label>RoomId : </label>
 						<input
 							value={inputValue.roomId}
@@ -192,7 +124,7 @@ const ChatList = () => {
 							onChange={(e) => onInfoChange(e, "roomId")}
 							placeholder="roomId"
 						/>
-					</div>
+					</div> */}
 					<div>
 						<label>title : </label>
 						<input
@@ -214,15 +146,19 @@ const ChatList = () => {
 						/>
 					</div>
 					<div>
-						<Button variant="secondary" type="submit">
+						<Button variant="success" type="submit">
 							add Room
 						</Button>
 					</div>
 				</form>
 			</div>
-			<div className="chatroomWrapper">{ChattingList}</div>
+			<div className="chatroomWrapper">
+				{chatrooms.map((chatroom, index) => {
+					return <ChatRoom chatroom={chatroom} index={index} />;
+				})}
+			</div>
 		</div>
 	);
 };
 
-export default ChatList;
+export default ChatMain;

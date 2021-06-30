@@ -14,7 +14,8 @@
 	align-items: center;
 	background-color: var(--background-color);
 }
-.loginWrapper {
+.loginWrapper,
+.signUpWrapper {
 	width: 30rem;
 	height: 20rem;
 	border: 1px solid #dddbdb;
@@ -36,6 +37,13 @@
 	padding: 0.75rem 0;
 	background-color: var(--main-color);
 	border-color: var(--main-color);
+	font-size: 0.75rem;
+	font-weight: bold;
+	margin-top: 1rem;
+}
+.backBtn {
+	width: 100%;
+	padding: 0.75rem 0;
 	font-size: 0.75rem;
 	font-weight: bold;
 	margin-top: 1rem;
@@ -81,19 +89,20 @@
 	margin-right: 1rem;
 }
 
-.chatRoomWrapper {
+.chatRoomMainWrapper {
 	width: 100%;
 	text-align: center;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	background-color: var(--background-color);
 }
 
 .chat-area {
 	width: 100%;
 	border: 1px solid #e3e3e3;
 	border-radius: 20px;
-	height: 35rem;
+	height: 37rem;
 	overflow: auto;
 }
 
@@ -114,17 +123,36 @@
 
 .chatBox {
 	width: 100%;
-	border: 1px solid #e3e3e3;
 	border-radius: 15px;
-	height: 5rem;
+	height: 7rem;
 	display: flex;
 	align-items: center;
+	margin-bottom: 1rem;
+}
+.chatBox:hover {
+	background-color: var(--main2-color);
+}
+.chatMessage {
+	background-color: white;
+	max-width: 100%;
+	padding: 0.75rem 1rem;
+	border-radius: 20px;
+}
+.messageWrapper {
+	max-width: 70%;
+	text-align: left;
+}
+
+.chatSender {
+	padding: 0.5rem;
 }
 .myChat {
 	justify-content: flex-end;
+	text-align: right;
 }
 .otherChat {
 	justify-content: flex-start;
+	text-align: left;
 }
 
 .chatListWrapper {
@@ -133,12 +161,13 @@
 
 .chatroomWrapper {
 	width: 100%;
-	height: 35rem;
+	max-height: 35rem;
 	overflow: auto;
 	display: flex;
 
-	justify-content: flex-start;
-	flex-wrap: wrap;
+	justify-content: flex-start !important;
+	/* flex-wrap: wrap; */
+	flex-direction: column;
 }
 .idBadge {
 	padding: 1.25rem 1.5rem;
@@ -152,7 +181,7 @@
 
 .chatroom {
 	width: 100%;
-	height: 6rem;
+	min-height: 6rem;
 	border: 1px solid #e3e3e3;
 	border-radius: 10px;
 	background-color: white;
@@ -178,9 +207,17 @@
 
 .logoutWrapper {
 	position: absolute;
+	top: 0;
 	right: 0;
 	margin-top: 1rem;
 	margin-right: 1rem;
+}
+.backWrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin-top: 1rem;
+	margin-left: 1rem;
 }
 
 .enterBtn {
@@ -192,4 +229,24 @@
 .deleteBtn {
 	background-color: var(--red-color);
 	border-color: var(--red-color);
+}
+
+.additionBox {
+	display: flex;
+	flex-direction: row;
+	border: 1px solid #e3e3e3;
+	background-color: var(--main3-color);
+	position: absolute;
+	width: auto;
+	height: 2.5rem;
+	margin-top: -1rem;
+	right: 1rem;
+	border-radius: 5px;
+}
+.additionBox div {
+	width: 4rem;
+	border-radius: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }

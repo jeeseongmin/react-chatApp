@@ -6,7 +6,6 @@ import { firebaseApp } from "../firebase";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
 import "../chatting.css";
-import main from "../image/main.png";
 
 const Home = () => {
 	const history = useHistory();
@@ -25,7 +24,7 @@ const Home = () => {
 					dispatch(setEmail(email.value));
 					dispatch(setPassword(password.value));
 					dispatch(setUuid(uid));
-					history.push("/chat/list");
+					history.push("/chat/main");
 				} else {
 					alert("error");
 				}

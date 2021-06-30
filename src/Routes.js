@@ -1,9 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import ChatRoom from "./pages/ChatRoom";
+import ChatRoomMain from "./pages/ChatRoomMain";
 import Home from "./pages/Home";
 import SignUp from "./pages/SignUp";
-import ChatList from "./pages/ChatList";
+import ChatMain from "./pages/ChatMain";
 
 class Routes extends React.Component {
 	render() {
@@ -11,9 +11,9 @@ class Routes extends React.Component {
 			<Router>
 				<Switch>
 					<Route exact path="/" component={Home} />
-					<Route exact path="/chat/list" component={ChatList} />
+					<Route exact path="/chat/main" component={ChatMain} />
 					<Route exact path="/users/signUp" component={SignUp} />
-					<Route exact path="/chat/room/:roomId" component={ChatRoom} />
+					<Route exact path="/chat/room/:rid" component={ChatRoomMain} />
 				</Switch>
 			</Router>
 		);
