@@ -5,29 +5,12 @@ import { Link, useHistory } from "react-router-dom";
 import { firebaseApp } from "../firebase";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
+import "../chatting.css";
+import main from "../image/main.png";
 
 const Home = () => {
 	const history = useHistory();
 	const dispatch = useDispatch();
-	// const jwtToken = useSelector((state: any) => state.user.jwtToken);
-
-	// // 랜덤한 Token을 저장하기 위한 함수
-	// const updateJwtToken = () => {
-	// 	const makeid = (length: number) => {
-	// 		var result = "";
-	// 		var characters =
-	// 			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	// 		var charactersLength = characters.length;
-	// 		for (var i = 0; i < length; i++) {
-	// 			result += characters.charAt(
-	// 				Math.floor(Math.random() * charactersLength)
-	// 			);
-	// 		}
-	// 		return result;
-	// 	};
-	// 	// Action을 dispatch해서 Reducer를 통해 Redux Store를 업데이트
-	// 	dispatch(setJwtToken(makeid(5)));
-	// };
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -55,24 +38,38 @@ const Home = () => {
 	};
 
 	return (
-		<div>
-			<h1>메인 페이지입니다.</h1>
-			<form onSubmit={handleSubmit}>
-				<div>
-					<input type="email" placeholder="email" />
+		<div className="Wrapper">
+			<div className="loginWrapper">
+				<h2>
+					<b>Chat Chat Chat</b>
+				</h2>
+				<form onSubmit={handleSubmit}>
+					<div>
+						<input
+							type="email"
+							className="loginInput"
+							placeholder="이메일 아이디, 이메일, 전화번호"
+						/>
+					</div>
+					<div>
+						<input
+							type="password"
+							className="loginInput"
+							placeholder="비밀번호"
+						/>
+					</div>
+					<div>
+						<Button variant="warning" className="loginBtn" type="submit">
+							로그인
+						</Button>
+					</div>
+				</form>
+				<div className="signupLinkWrapper">
+					<Link to="/users/signUp" className="signupLink">
+						회원가입
+					</Link>
 				</div>
-				<div>
-					<input type="password" placeholder="password" />
-				</div>
-				<div>
-					<Button variant="primary" type="submit">
-						Login
-					</Button>
-				</div>
-			</form>
-			<Link variant="danger" to="/users/signUp">
-				SignUp
-			</Link>
+			</div>
 		</div>
 	);
 };

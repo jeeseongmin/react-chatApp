@@ -1,11 +1,69 @@
-.cardWrapper {
-	display: flex;
-	justify-content: flex-start;
-	flex-wrap: wrap;
+:root {
+	--main-color: #83c9e7;
+	--main2-color: #4a88da;
+	--main3-color: #82c8e6;
+	--background-color: #e4f3fa;
+	--red-color: #ff4040;
 }
 
-.cardComponent {
-	flex: 1 1 30%;
+.Wrapper {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: var(--background-color);
+}
+.loginWrapper {
+	width: 30rem;
+	height: 20rem;
+	border: 1px solid #dddbdb;
+	padding: 2rem 3rem;
+	border-radius: 10px;
+	background-color: white;
+}
+
+.loginInput {
+	border-style: none;
+	border-bottom: 1px solid #e3e3e3;
+	width: 100%;
+	padding: 0.75rem 0.5rem;
+	margin-bottom: 0.5rem;
+	cursor: pointer;
+}
+.loginBtn {
+	width: 100%;
+	padding: 0.75rem 0;
+	background-color: var(--main-color);
+	border-color: var(--main-color);
+	font-size: 0.75rem;
+	font-weight: bold;
+	margin-top: 1rem;
+}
+.loginBtn:hover {
+	background-color: var(--main2-color);
+	border: 1px solid var(--main2-color);
+	color: white;
+}
+.loginInput:active {
+	border-style: none !important;
+	border-bottom: 1px solid black;
+}
+.signupLinkWrapper {
+	width: 100%;
+	text-align: left;
+	padding: 1rem 0.5rem;
+}
+.signupLink {
+	width: 100% !important;
+	color: black;
+	font-size: 0.75rem;
+	font-weight: bold;
+	float: right;
+}
+.signupLink:hover {
+	text-decoration: none !important;
+	color: var(--main2-color);
 }
 
 .buttonWrapper {
@@ -16,17 +74,11 @@
 	display: flex;
 	justify-content: flex-start;
 	margin-bottom: 3rem;
+	align-items: center;
+	width: auto;
 }
 .formWrapper div {
 	margin-right: 1rem;
-}
-
-.header {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: center;
-	padding: 0 2rem;
 }
 
 .chatRoomWrapper {
@@ -73,4 +125,71 @@
 }
 .otherChat {
 	justify-content: flex-start;
+}
+
+.chatListWrapper {
+	background-color: var(--background-color);
+}
+
+.chatroomWrapper {
+	width: 100%;
+	height: 35rem;
+	overflow: auto;
+	display: flex;
+
+	justify-content: flex-start;
+	flex-wrap: wrap;
+}
+.idBadge {
+	padding: 1.25rem 1.5rem;
+	font-size: 1.5rem;
+	border-radius: 20px;
+	background-color: var(--main3-color);
+}
+.cardComponent {
+	flex: 1 1 30%;
+}
+
+.chatroom {
+	width: 100%;
+	height: 6rem;
+	border: 1px solid #e3e3e3;
+	border-radius: 10px;
+	background-color: white;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 1rem;
+	margin-bottom: 0.25rem;
+	font-weight: bold;
+}
+
+.chatroom div:not(.btnWrapper) {
+	width: 30%;
+}
+
+.btnWrapper {
+}
+
+.chatListHeader {
+	text-align: center;
+	margin-bottom: 1rem;
+}
+
+.logoutWrapper {
+	position: absolute;
+	right: 0;
+	margin-top: 1rem;
+	margin-right: 1rem;
+}
+
+.enterBtn {
+	background-color: var(--main2-color);
+	border-color: var(--main2-color);
+	margin-right: 1rem;
+}
+
+.deleteBtn {
+	background-color: var(--red-color);
+	border-color: var(--red-color);
 }

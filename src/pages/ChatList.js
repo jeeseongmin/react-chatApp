@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import { useHistory } from "react-router-dom";
 import { db, firebaseApp, firebase } from "../firebase";
 import { v4 as uuidv4 } from "uuid";
-import { Button, Card } from "react-bootstrap";
+import { Button, Card, Badge } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../chatting.css";
 import { useSelector } from "react-redux";
@@ -70,28 +70,37 @@ const ChatList = () => {
 	}
 
 	const ChattingList = chatrooms.map((chatroom, index) => (
-		<Card style={{ width: "18rem" }} className="cardComponent">
-			<Card.Body>
-				<Card.Title>
-					{chatroom.host.slice(0, chatroom.host.indexOf("@"))}님의 <br></br>
-					{chatroom.title}
-				</Card.Title>
-				<div className="buttonWrapper">
-					<Button
-						variant="primary"
-						onClick={(e) => {
-							enterChatRoom(chatroom);
-						}}
-						key={index}
-					>
-						입장
-					</Button>
-					<Button variant="danger" value={chatroom.roomId} onClick={deleteRoom}>
-						삭제
-					</Button>
-				</div>
-			</Card.Body>
-		</Card>
+		<div className="chatroom">
+			<Badge variant="success" className="idBadge">
+				{chatroom.roomId}
+			</Badge>
+			<div className="">
+				<h4>{chatroom.title}</h4>
+			</div>
+			<div className="">
+				{chatroom.host.slice(0, chatroom.host.indexOf("@"))}님의 채팅방
+			</div>
+			<div className="btnWrapper">
+				<Button
+					variant="primary"
+					onClick={(e) => {
+						enterChatRoom(chatroom);
+					}}
+					className="enterBtn"
+					key={index}
+				>
+					입장
+				</Button>
+				<Button
+					variant="danger"
+					className="deleteBtn"
+					value={chatroom.roomId}
+					onClick={deleteRoom}
+				>
+					삭제
+				</Button>
+			</div>
+		</div>
 	));
 
 	const history = useHistory();
@@ -160,13 +169,15 @@ const ChatList = () => {
 	};
 
 	return (
-		<div>
-			<h1>Chat List</h1>
-			<div className="header">
-				<p>나의 계정 : {email}</p>
+		<div className="chatListWrapper">
+			<div className="logoutWrapper">
 				<Button variant="secondary" onClick={logOut}>
 					Logout
 				</Button>
+			</div>
+			<div className="chatListHeader">
+				<h1>Chat Chat Chat</h1>
+				<h4>{email}님 환영합니다.</h4>
 			</div>
 
 			<div>
@@ -209,7 +220,7 @@ const ChatList = () => {
 					</div>
 				</form>
 			</div>
-			<div className="cardWrapper">{ChattingList}</div>
+			<div className="chatroomWrapper">{ChattingList}</div>
 		</div>
 	);
 };

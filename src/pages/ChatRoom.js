@@ -6,6 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../chatting.css";
 import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
+import Chat from "../components/Chat";
 
 const ChatRoom = () => {
 	const uid = useSelector((state) => state.user.uuid);
@@ -54,7 +55,6 @@ const ChatRoom = () => {
 	const scrollToBottom = () => {
 		// console.log('box: ', box);
 		const { scrollHeight, clientHeight, scrollTop } = chatBox.current;
-		console.log(scrollHeight, clientHeight, scrollTop);
 		chatBox.current.scrollTop = scrollHeight - clientHeight;
 	};
 	/* 
@@ -64,6 +64,7 @@ const ChatRoom = () => {
 	*/
 
 	const sendMessage = () => {
+		console.log("send message");
 		const payload = {
 			uidOfUser: uid,
 			content: text,
@@ -112,6 +113,7 @@ const ChatRoom = () => {
 						const newEntry = change.doc.data();
 						newEntry.id = change.doc.id;
 						setNewCandidate(newEntry);
+						console.log("added!");
 					}
 					// 수정된 data일 때
 					if (change.type === "modified") {
@@ -127,6 +129,9 @@ const ChatRoom = () => {
 				});
 			});
 	}, []);
+
+	// input은 n개의 url api
+	// ouput은 api 하나당 데이터가 접근 가능한 상태. state
 
 	// useEffect(() => {
 	// 	const cp = [...chats];
@@ -178,24 +183,25 @@ const ChatRoom = () => {
 	// 		});
 	// }, []);
 
-	const chatHistory = chats.map((chat, index) => {
-		if (index !== 0) {
-			if (chat.uidOfUser === uid) {
-				return (
-					<div className="chatBox myChat">
-						<div className="">{chat.content}</div>
-					</div>
-				);
-			} else if (chat.uidOfUser !== uid) {
-				return (
-					<div className="chatBox otherChat">
-						<div className=""></div>
-						<div className="">{chat.content}</div>
-					</div>
-				);
-			}
-		}
-	});
+	// const chatHistory = chats.map((chat, index) => {
+	// 	console.log("haha");
+	// 	if (index !== 0) {
+	// 		if (chat.uidOfUser === uid) {
+	// 			return (
+	// 				<div className="chatBox myChat">
+	// 					<div className="">{chat.content}</div>
+	// 				</div>
+	// 			);
+	// 		} else if (chat.uidOfUser !== uid) {
+	// 			return (
+	// 				<div className="chatBox otherChat">
+	// 					<div className=""></div>
+	// 					<div className="">{chat.content}</div>
+	// 				</div>
+	// 			);
+	// 		}
+	// 	}
+	// });
 
 	return (
 		<div className="chatRoomWrapper">
@@ -204,7 +210,12 @@ const ChatRoom = () => {
 			</h1>
 			<h3>호스트 : {roomInfo.host}</h3>
 			<div className="chat-area" ref={chatBox}>
-				{chatHistory}
+				{/* {chatHistory} */}
+				{chats.map((chat, index) => {
+					if (index !== 0) {
+						return <Chat chat={chat} key={chat.uid} uid={uid} />;
+					}
+				})}
 			</div>
 			<div className="sendMessageWrapper">
 				<input
