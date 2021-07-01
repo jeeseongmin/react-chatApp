@@ -9,6 +9,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../chatting.css";
 import { useSelector } from "react-redux";
 import ChatRoom from "../components/ChatRoom";
+import MyInvitationModal from "../components/MyInvitationModal";
 
 const ChatMain = () => {
 	const email = useSelector((state) => state.user.email);
@@ -23,6 +24,9 @@ const ChatMain = () => {
 		password: "",
 	});
 	const [payload, setPayload] = useState({});
+	const [modalShow, setModalShow] = useState(false);
+
+	// 로그인 한 유저가 aceept 되어있는 목록
 
 	const onInfoChange = (e, key) => {
 		const cp = { ...inputValue };
@@ -103,10 +107,12 @@ const ChatMain = () => {
 		}
 	};
 
-	const enterChatRoom = async (chatroomInfo) => {
+	const enterChatRoom = async (chatroomInfo, acceptRooms) => {
 		const roomPasword = chatroomInfo.password;
 		// 패스워드를 입력했거나, 내가 초대된 방이면
-		if (chatroomInfo.guest) {
+		console.log(acceptRooms);
+		if (acceptRooms) {
+			history.push("/chat/room/" + chatroomInfo.id);
 		} else if (email !== chatroomInfo.host) {
 			const answer = prompt("방의 비밀번호를 입력해주세요.");
 			if (answer === roomPasword) {
@@ -144,9 +150,21 @@ const ChatMain = () => {
 
 	return (
 		<div className="chatListWrapper">
+			<MyInvitationModal
+				show={modalShow}
+				onHide={() => setModalShow(false)}
+				uid={uid}
+			/>
 			<div className="logoutWrapper">
+				<Button
+					variant="success"
+					className="inviteBtn"
+					onClick={() => setModalShow(true)}
+				>
+					내 알림
+				</Button>
 				<Button variant="secondary" onClick={logOut}>
-					Logout
+					로그아웃
 				</Button>
 			</div>
 			<div className="chatListHeader">
@@ -162,16 +180,6 @@ const ChatMain = () => {
 								<b>채팅방 새로 만들기 : </b>
 							</h4>
 						</div>
-						{/* <div>
-						<label>RoomId : </label>
-						<input
-							value={inputValue.roomId}
-							type="text"
-							name="roomId"
-							onChange={(e) => onInfoChange(e, "roomId")}
-							placeholder="roomId"
-						/>
-					</div> */}
 						<div>
 							<input
 								value={inputValue.title}
@@ -193,7 +201,7 @@ const ChatMain = () => {
 						</div>
 						<div>
 							<Button variant="success" type="submit">
-								add Room
+								추가
 							</Button>
 						</div>
 					</div>
@@ -201,15 +209,18 @@ const ChatMain = () => {
 			</div>
 			<div className="chatroomWrapper">
 				{chatrooms.map((chatroom, index) => {
+					// 허락되지 않은 room들
 					return (
 						<ChatRoom
 							chatroom={chatroom}
 							index={index}
 							key={index}
+							uid={uid}
 							deleteOne={deleteRoom}
 							enterRoom={enterChatRoom}
 						/>
 					);
+					// 허락된 room들
 				})}
 			</div>
 		</div>

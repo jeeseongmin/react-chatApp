@@ -1,21 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button, Badge } from "react-bootstrap";
 import "../chatting.css";
+import { db, firebaseApp, firebase } from "../firebase";
 
 const ChatRoom = (props) => {
 	// props로 받아오는 해당 room information
 	const chatroomInfo = props.chatroom;
+	const uid = props.uid;
 
 	// props로 받아오는 delete 함수
 	const deleteOne = props.deleteOne;
 
 	const enterRoom = props.enterRoom;
+	const [acceptRooms, setAcceptRooms] = useState([]);
 
 	// 맨 앞 index 표시
 	const index = props.index * 1 + 1;
 	const history = useHistory();
+
+	useEffect(() => {
+		const acceptList = async function (req, res) {
+			let cp = await db
+				.collection("user")
+				.doc(uid)
+				.collection("invitation")
+				.doc("type")
+				.get();
+			setAcceptRooms(cp.data().acceptRoom);
+		};
+		acceptList();
+	}, []);
 
 	// const enterChatRoom = (chatroomInfo) => {
 	// 	history.push("/chat/room/" + chatroomInfo.id);
@@ -23,8 +39,23 @@ const ChatRoom = (props) => {
 
 	const LockBadge = (e) => {
 		const info = e.isLock;
-		console.log(info);
-		if (info) {
+		const rid = e.rid;
+		console.log(acceptRooms);
+
+		// if (acceptRooms.length > 0) {
+		// 	if (acceptRooms.indexOf(rid) !== -1) isInvited = true;
+		// 	else isInvited = false;
+		// } else {
+		// 	isInvited = false;
+		// }
+
+		if (acceptRooms.includes(rid) || chatroomInfo.uidOfUser === uid) {
+			return (
+				<Badge variant="success" className="lockBadge">
+					Accept
+				</Badge>
+			);
+		} else if (info) {
 			return (
 				<Badge variant="danger" className="lockBadge">
 					Lock
@@ -44,7 +75,8 @@ const ChatRoom = (props) => {
 			<Badge variant="success" className="idBadge">
 				{index}
 			</Badge>
-			<LockBadge isLock={chatroomInfo.password} />
+
+			<LockBadge isLock={chatroomInfo.password} rid={chatroomInfo.id} />
 			<div className="">
 				<h4>{chatroomInfo.title}</h4>
 			</div>
@@ -55,7 +87,7 @@ const ChatRoom = (props) => {
 				<Button
 					variant="primary"
 					onClick={(e) => {
-						enterRoom(chatroomInfo);
+						enterRoom(chatroomInfo, acceptRooms.includes(chatroomInfo.id));
 					}}
 					className="enterBtn"
 					key={index}

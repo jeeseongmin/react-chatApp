@@ -12,6 +12,9 @@ const InviteModal = (props) => {
 	const [acceptList, setAcceptList] = useState([]);
 	const [rejectList, setRejectList] = useState([]);
 
+	const [userWaiting, setUserWaiting] = useState([]);
+	const [userAccept, setUserAccept] = useState([]);
+	const [userReject, setUserReject] = useState([]);
 	useEffect(() => {
 		const listing = async function () {
 			try {
@@ -70,6 +73,7 @@ const InviteModal = (props) => {
 		// indexOf = -1이면 없는 것
 		// 대기 순위에 없으면 ㄱㄱ
 
+		// room 입장
 		await db
 			.collection("chatrooms")
 			.doc(rid)
@@ -81,6 +85,41 @@ const InviteModal = (props) => {
 				reject: rejectList,
 			});
 		setWaitingList([...waitingList, receiver]);
+
+		// user 입장에서 짝지어주기.
+		try {
+			const cp = await db
+				.collection("user")
+				.doc(receiver)
+				.collection("invitation")
+				.doc("type")
+				.get();
+			const wList = cp.data().waitingRoom;
+			const aList = cp.data().acceptRoom;
+			const rList = cp.data().rejectRoom;
+
+			await db
+				.collection("user")
+				.doc(receiver)
+				.collection("invitation")
+				.doc("type")
+				.set({
+					waitingRoom: [...wList, rid],
+					acceptRoom: aList,
+					rejectRoom: rList,
+				});
+		} catch (error) {
+			await db
+				.collection("user")
+				.doc(receiver)
+				.collection("invitation")
+				.doc("type")
+				.set({
+					waitingRoom: [rid],
+					acceptRoom: [],
+					rejectRoom: [],
+				});
+		}
 	};
 
 	// 대기 중인 사람 취소하기.
@@ -107,6 +146,45 @@ const InviteModal = (props) => {
 					reject: rejectList,
 				});
 			setWaitingList(cp);
+			try {
+				await db
+					.collection("user")
+					.doc(receiver)
+					.collection("invitation")
+					.doc("type")
+					.set({
+						waitingRoom: [...waitingList, receiver],
+						acceptRoom: acceptList,
+						rejectRoom: rejectList,
+					});
+
+				const cp = await db
+					.collection("user")
+					.doc(receiver)
+					.collection("invitation")
+					.doc("type")
+					.get();
+				const wList = cp.data().waitingRoom;
+				const aList = cp.data().acceptRoom;
+				const rList = cp.data().rejectRoom;
+
+				const cp_user = await wList.filter(function (element) {
+					return element !== rid;
+				});
+
+				await db
+					.collection("user")
+					.doc(receiver)
+					.collection("invitation")
+					.doc("type")
+					.set({
+						waitingRoom: cp_user,
+						acceptRoom: aList,
+						rejectRoom: rList,
+					});
+			} catch (error) {
+				console.log("데이터베이스 오류");
+			}
 		}
 	};
 
@@ -130,13 +208,13 @@ const InviteModal = (props) => {
 			);
 		} else if (acceptList.indexOf(receiver) !== -1) {
 			return (
-				<Button variant="success" uid={uid} rid={rid} receiver={receiver}>
+				<Button variant="success" className="notUseBtn" uid={uid} rid={rid} receiver={receiver}>
 					수락
 				</Button>
 			);
 		} else if (rejectList.indexOf(receiver) !== -1) {
 			return (
-				<Button variant="danger" uid={uid} rid={rid} receiver={receiver}>
+				<Button variant="danger" className="notUseBtn" uid={uid} rid={rid} receiver={receiver}>
 					거절
 				</Button>
 			);
@@ -193,11 +271,11 @@ const InviteModal = (props) => {
 	);
 };
 
-const areEqual = (prevProps, nextProps) => {
-	return (
-		prevProps.content === nextProps.content && prevProps.id === nextProps.id
-	);
-};
+// const areEqual = (prevProps, nextProps) => {
+// 	return (
+// 		prevProps.content === nextProps.content && prevProps.id === nextProps.id
+// 	);
+// };
 
-export default React.memo(InviteModal, areEqual);
-// export default InviteModal;
+// export default React.memo(InviteModal, areEqual);
+export default InviteModal;

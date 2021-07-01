@@ -196,6 +196,7 @@
 	padding: 0.5rem 1.5rem;
 	font-size: 1.5rem;
 	border-radius: 5px;
+	width: 10rem;
 }
 .cardComponent {
 	flex: 1 1 30%;
@@ -233,7 +234,11 @@
 	right: 0;
 	margin-top: 1rem;
 	margin-right: 1rem;
+	width: 12rem;
+	display: flex;
+	justify-content: space-between;
 }
+
 .backWrapper {
 	position: absolute;
 	top: 0;
@@ -287,10 +292,12 @@
 	width: 2rem;
 }
 
-.userListWrapper {
+.userListWrapper,
+.myDivWrapper {
 	padding: 0.25rem 1rem;
 }
-.userBox {
+.userBox,
+.divBox {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
@@ -310,6 +317,24 @@
 	width: 80%;
 	margin: 0 1rem;
 }
+.senderNameWrapper {
+	min-width: 70%;
+	margin: 0 1rem;
+}
+.senderNameWrapper h5 {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
 .invite_userimg {
 	width: 100%;
+}
+.myDivBtnWrapper {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 10rem;
+}
+.notUseBtn {
+	cursor: none;
 }
