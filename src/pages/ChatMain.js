@@ -15,25 +15,27 @@ const ChatMain = () => {
 	const uid = useSelector((state) => state.user.uid);
 
 	const history = useHistory();
+	//
 	const [chatrooms, setChatrooms] = useState([]);
 	const [inputValue, setInputValue] = useState({
 		roomId: "",
 		title: "",
 		password: "",
 	});
+	const [payload, setPayload] = useState({});
 
 	const onInfoChange = (e, key) => {
 		const cp = { ...inputValue };
 		cp[key] = e.target.value;
 		setInputValue(cp);
 	};
+
 	useEffect(() => {
-		console.log("upload");
-		db.collection("chatrooms")
-			.get()
-			.then((querySnapshot) => {
-				setChatrooms(querySnapshot.docs.map((doc) => doc.data()));
-			});
+		const setting = async function (req, res) {
+			let querySnapshot = await db.collection("chatrooms").get();
+			setChatrooms(querySnapshot.docs.map((doc) => doc.data()));
+		};
+		setting();
 	}, []);
 
 	const logOut = () => {
@@ -42,61 +44,101 @@ const ChatMain = () => {
 		history.push("/");
 	};
 
+	const addRooms = async (payload) => {
+		console.log("addRooms");
+		console.log(payload);
+		setPayload(payload);
+		try {
+			await db.collection("chatrooms").doc(payload.id).set({
+				title: payload.title,
+				password: payload.password,
+				id: payload.id,
+				uidOfUser: uid,
+				host: payload.host,
+				messages: {},
+			});
+			const cp = [...chatrooms];
+			cp.push(payload);
+			setChatrooms(cp);
+			console.log("Document successfully written!");
+			alert("방이 생성되었습니다!");
+
+			setInputValue({
+				title: "",
+				password: "",
+			});
+		} catch (error) {
+			console.error("Error writing document: ", error);
+		}
+	};
+
 	// 새로운 room을 생성한다.
-	const addRoom = (e) => {
+	const checkRooms = async (e) => {
 		e.preventDefault();
 		const { title, password } = e.target.elements;
-		if (title.value && password.value) {
+		if (title.value) {
 			const rid = uuidv4();
-			db.collection("chatrooms")
-				.doc(rid)
-				.get()
-				.then((doc) => {
-					if (doc.data()) {
-						alert("해당 번호로 등록된 채팅방이 있습니다.");
-					} else {
-						const payload = {
-							title: title.value,
-							password: password.value,
-							id: rid,
-							// room 만든 사람
-							uidOfUser: uid,
-							// 그냥 편의로 만든 host.
-							host: email,
-							messages: {},
-						};
-						// 해당 id의 방이 없으므로 생성
-						db.collection("chatrooms")
-							.doc(rid)
-							.set({
-								title: payload.title,
-								password: payload.password,
-								id: payload.id,
-								uidOfUser: uid,
-								host: payload.host,
-								messages: {},
-							})
-							.then((e) => {
-								const cp = [...chatrooms];
-								cp.push(payload);
-								setChatrooms(cp);
-								console.log("Document successfully written!");
-								alert("방이 생성되었습니다!");
-								setInputValue({
-									title: "",
-									password: "",
-								});
-							})
-							.catch((error) => {
-								console.error("Error writing document: ", error);
-							});
-					}
-				})
-				.catch((error) => {
-					alert("데이터베이스 오류");
-				});
+			try {
+				const doc = await db.collection("chatrooms").doc(rid).get();
+				if (doc.data()) {
+					alert("해당 번호로 등록된 채팅방이 있습니다.");
+				} else {
+					const _payload = {
+						title: title.value,
+						password: password.value,
+						id: rid,
+						// room 만든 사람
+						uidOfUser: uid,
+						// 그냥 편의로 만든 host.
+						host: email,
+						messages: {},
+					};
+					// setPayload(_payload);
+					// 해당 id의 방이 없으므로 생성
+					addRooms(_payload);
+				}
+			} catch (error) {
+				alert("오류 발생");
+			}
+		}
+	};
+
+	const enterChatRoom = async (chatroomInfo) => {
+		const roomPasword = chatroomInfo.password;
+		// 패스워드를 입력했거나, 내가 초대된 방이면
+		if (chatroomInfo.guest) {
+		} else if (email !== chatroomInfo.host) {
+			const answer = prompt("방의 비밀번호를 입력해주세요.");
+			if (answer === roomPasword) {
+				history.push("/chat/room/" + chatroomInfo.id);
+			} else {
+				alert("비밀번호가 틀렸습니다.");
+			}
 		} else {
-			alert("미입력된 항목이 있습니다.");
+			history.push("/chat/room/" + chatroomInfo.id);
+		}
+	};
+
+	const deleteRoom = async (e) => {
+		const deleteId = e.target.value;
+		const doc = await db.collection("chatrooms").doc(deleteId).get();
+		const deletePassword = doc.data().password;
+		if (email === doc.data().host) {
+			console.log(deletePassword);
+			const answer = prompt("비밀번호를 입력해주세요.");
+			if (answer === deletePassword) {
+				db.collection("chatrooms").doc(deleteId).delete();
+				alert("삭제되었습니다.");
+
+				const cp = chatrooms.filter(function (element) {
+					return element.id !== deleteId;
+				});
+				setChatrooms(cp);
+			} else {
+				alert("비밀번호가 틀렸습니다.");
+			}
+		} else {
+			alert("작성자만 삭제할 수 있습니다.");
 		}
 	};
 
@@ -109,13 +151,18 @@ const ChatMain = () => {
 			</div>
 			<div className="chatListHeader">
 				<h1>Chat Chat Chat</h1>
-				<h4>{email}님 환영합니다.</h4>
+				<h4>{email.slice(0, email.indexOf("@"))}님 환영합니다.</h4>
 			</div>
 
 			<div>
-				<form onSubmit={addRoom} className="formWrapper">
-					<div>채팅방 새로 만들기 - </div>
-					{/* <div>
+				<form onSubmit={checkRooms} className="formWrapper">
+					<div>
+						<div>
+							<h4>
+								<b>채팅방 새로 만들기 : </b>
+							</h4>
+						</div>
+						{/* <div>
 						<label>RoomId : </label>
 						<input
 							value={inputValue.roomId}
@@ -125,36 +172,44 @@ const ChatMain = () => {
 							placeholder="roomId"
 						/>
 					</div> */}
-					<div>
-						<label>title : </label>
-						<input
-							value={inputValue.title}
-							type="text"
-							name="title"
-							onChange={(e) => onInfoChange(e, "title")}
-							placeholder="title"
-						/>
-					</div>
-					<div>
-						<label>password : </label>
-						<input
-							value={inputValue.password}
-							type="password"
-							name="password"
-							onChange={(e) => onInfoChange(e, "password")}
-							placeholder="password"
-						/>
-					</div>
-					<div>
-						<Button variant="success" type="submit">
-							add Room
-						</Button>
+						<div>
+							<input
+								value={inputValue.title}
+								type="text"
+								name="title"
+								className="inputBox"
+								onChange={(e) => onInfoChange(e, "title")}
+								placeholder="title"
+							/>
+						</div>
+						<div>
+							<input
+								value={inputValue.password}
+								type="password"
+								name="password"
+								onChange={(e) => onInfoChange(e, "password")}
+								placeholder="password"
+							/>
+						</div>
+						<div>
+							<Button variant="success" type="submit">
+								add Room
+							</Button>
+						</div>
 					</div>
 				</form>
 			</div>
 			<div className="chatroomWrapper">
 				{chatrooms.map((chatroom, index) => {
-					return <ChatRoom chatroom={chatroom} index={index} />;
+					return (
+						<ChatRoom
+							chatroom={chatroom}
+							index={index}
+							key={index}
+							deleteOne={deleteRoom}
+							enterRoom={enterChatRoom}
+						/>
+					);
 				})}
 			</div>
 		</div>

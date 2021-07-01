@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { db, firebase, firebaseApp } from "../firebase";
-import { Button, Card, Badge } from "react-bootstrap";
+import { Button, Card, Badge, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../chatting.css";
 import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import Chat from "../components/Chat";
+import InviteModal from "../components/InviteModal";
 
 const ChatRoomMain = () => {
 	const uid = useSelector((state) => state.user.uid);
@@ -21,13 +22,15 @@ const ChatRoomMain = () => {
 	const [chats, setChats] = useState([]);
 	const [modifyCandidate, setModifyCandidate] = useState(null);
 	const [newCandidate, setNewCandidate] = useState(null);
+	// const [peopleList, setPeopleList] = useState([]);
+
+	const [modalShow, setModalShow] = useState(false);
 
 	// 맨 처음에 정보들 받아올 때.
 	useEffect(() => {
-		db.collection("chatrooms")
-			.doc(rid)
-			.get()
-			.then((doc) => {
+		let init = async function (req, res) {
+			try {
+				const doc = await db.collection("chatrooms").doc(rid).get();
 				if (doc.data()) {
 					const hostEmail = doc
 						.data()
@@ -44,10 +47,11 @@ const ChatRoomMain = () => {
 				} else {
 					alert("방을 찾을 수 없습니다.");
 				}
-			})
-			.catch((error) => {
+			} catch (error) {
 				alert("데이터베이스 오류");
-			});
+			}
+		};
+		init();
 	}, []);
 
 	const goBack = () => {
@@ -66,30 +70,28 @@ const ChatRoomMain = () => {
 	*/
 
 	// 메시지를 보내는 함수.
-	const sendMessage = () => {
-		console.log("send message");
+	const sendMessage = async () => {
 		const payload = {
 			uidOfUser: uid,
 			content: text,
 			id: uuidv4(),
 			created: firebase.firestore.Timestamp.now().seconds,
 		};
-		console.log(payload);
 		/* 
 			예제에서는 이 부분이 없어서 생각해보다가 
 			각 chatroom에 messages라는 collection을 만드는 것이 맞다고 생각했다.
 		*/
-		db.collection("chatrooms")
+		await db
+			.collection("chatrooms")
 			.doc(rid)
 			.collection("messages")
-			.add(payload)
-			.then((ref) => {
-				setText("");
-				const cp = [...chats];
-				cp.push(payload);
-				setChats(cp);
-				scrollToBottom();
-			});
+			.add(payload);
+		// message 창 초기화
+		setText("");
+		const cp = [...chats];
+		cp.push(payload);
+		setChats(cp);
+		scrollToBottom();
 	};
 
 	useEffect(() => {
@@ -102,114 +104,61 @@ const ChatRoomMain = () => {
 	useEffect(() => {
 		// 초기화를 해줘야 쌓이지 않는다.
 		// setChats([]);
-		const chatRef = db.collection("chatrooms").doc(rid).collection("messages");
-		chatRef
-			.orderBy("created")
-			.get()
-			.then((snapshot) => {
-				// 이렇게 특정 change type으로 나누는 이유가 무엇일까?
-				snapshot.docChanges().forEach((change) => {
-					// 새로운 data일 때
-					if (change.type === "added") {
-						const newEntry = change.doc.data();
-						newEntry.id = change.doc.id;
-						setNewCandidate(newEntry);
-						console.log("added!");
-					}
-					// 수정된 data일 때
-					if (change.type === "modified") {
-						const data = change.doc.data();
-						data.id = change.doc.id;
-						setModifyCandidate(data);
-					}
-					// 제거된 data일 때
-					if (change.type === "removed") {
-						console.log("remove message: ", change.doc.data());
-					}
-					scrollToBottom();
-				});
+		let onChange = async function () {
+			const snapshot = await db
+				.collection("chatrooms")
+				.doc(rid)
+				.collection("messages")
+				.orderBy("created")
+				.get();
+			snapshot.docChanges().forEach((change) => {
+				// 새로운 data일 때
+				if (change.type === "added") {
+					const newEntry = change.doc.data();
+					newEntry.id = change.doc.id;
+					setNewCandidate(newEntry);
+					console.log("added!");
+				}
+				// 수정된 data일 때
+				if (change.type === "modified") {
+					const data = change.doc.data();
+					data.id = change.doc.id;
+					setModifyCandidate(data);
+				}
+				// 제거된 data일 때
+				if (change.type === "removed") {
+					console.log("remove message: ", change.doc.data());
+				}
+				// scrollToBottom();
 			});
+		};
+
+		onChange();
 	}, []);
-
-	// input은 n개의 url api
-	// ouput은 api 하나당 데이터가 접근 가능한 상태. state
-
-	// useEffect(() => {
-	// 	const cp = [...chats];
-	// 	const index = cp.findIndex((el) => el.uid === modifyCandidate.uid);
-	// 	cp[index] = modifyCandidate;
-	// 	setChats(cp);
-	// }, [modifyCandidate]);
-
-	// useEffect(() => {
-	// 	const chatRef = db
-	// 		.collection("chatrooms")
-	// 		.doc(_roomId)
-	// 		.collection("messages");
-	// 	chatRef.orderBy("created").onSnapshot((snapshot) => {
-	// 		snapshot.docChanges().forEach((change) => {
-	// 			if (change.type === "added") {
-	// 				const newEntry = change.doc.data();
-	// 				newEntry.id = change.doc.id;
-	// 				setModifyCandidate(newEntry);
-	// 			}
-	// 			if (change.type === "modified") {
-	// 				const data = change.doc.data();
-	// 				data.id = change.doc.id;
-	// 				setModifyCandidate(data);
-	// 			}
-	// 			if (change.type === "removed") {
-	// 				console.log("remove message: ", change.doc.data());
-	// 			}
-	// 		});
-	// 	});
-	// }, []);
-
-	// useEffect(() => {
-	// 	const messageRef = db
-	// 		.collection("chatrooms")
-	// 		.doc(_roomId)
-	// 		.collection("messages");
-
-	// 	messageRef
-	// 		.orderBy("created")
-	// 		.get()
-	// 		.then((snapshot) => {
-	// 			const data = snapshot.docs.map((doc) => ({
-	// 				id: doc.id,
-	// 				...doc.data(),
-	// 			}));
-	// 			setChats(data);
-	// 			console.log(data);
-	// 		});
-	// }, []);
-
-	// const chatHistory = chats.map((chat, index) => {
-	// 	console.log("haha");
-	// 	if (index !== 0) {
-	// 		if (chat.uidOfUser === uid) {
-	// 			return (
-	// 				<div className="chatBox myChat">
-	// 					<div className="">{chat.content}</div>
-	// 				</div>
-	// 			);
-	// 		} else if (chat.uidOfUser !== uid) {
-	// 			return (
-	// 				<div className="chatBox otherChat">
-	// 					<div className=""></div>
-	// 					<div className="">{chat.content}</div>
-	// 				</div>
-	// 			);
-	// 		}
-	// 	}
-	// });
 
 	return (
 		<div className="chatRoomMainWrapper">
+			<InviteModal
+				show={modalShow}
+				onHide={() => setModalShow(false)}
+				uid={uid}
+				rid={rid}
+			/>
 			<div className="backWrapper">
 				<Button variant="secondary" onClick={goBack}>
 					Back
 				</Button>
+			</div>
+			<div className="inviteWrapper">
+				{uid === roomInfo.uidOfUser && (
+					<Button
+						variant="success"
+						className="inviteBtn"
+						onClick={() => setModalShow(true)}
+					>
+						+ 초대
+					</Button>
+				)}
 			</div>
 			<h1>
 				{roomInfo.title} <Badge variant="primary">On</Badge>

@@ -3,13 +3,17 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 import "../chatting.css";
 import { db } from "../firebase";
+import likeImg from "../image/like.png";
+import sleepImg from "../image/sleep.png";
+import smileImg from "../image/smile.png";
+import editImg from "../image/edit.png";
+import deleteImg from "../image/delete.png";
 
 const Chat = (props) => {
 	const [hostName, setHostName] = useState();
 	console.timeLog("render chat" + props.chat.uid);
 	const chat = props.chat;
 	const uuid = props.uid;
-	const chatBox = useRef(null);
 
 	const [toggleBox, setToggleBox] = useState(false);
 	const [toggleMe, setToggleMe] = useState(false);
@@ -22,31 +26,17 @@ const Chat = (props) => {
 		setToggleBox(false);
 	};
 
-	const onMouseOver2 = () => {
-		setToggleMe(true);
-	};
-
-	const onMouseOut2 = () => {
-		setToggleMe(false);
-	};
-
 	console.log(chat.uidOfUser);
 
 	useEffect(() => {
-		function fetchHost() {
-			return new Promise(async (resolve, reject) => {
-				const senderRef = await db.collection("user").doc(chat.uidOfUser).get();
-				let ref = senderRef.data();
-				let host = ref.email.slice(0, ref.email.indexOf("@"));
-				resolve(host);
-			});
-		}
+		let findHostName = async function (req, res) {
+			let sender = await db.collection("user").doc(chat.uidOfUser).get();
+			let senderRef = sender.data();
+			let host = await senderRef.email.slice(0, senderRef.email.indexOf("@"));
+			setHostName(host);
+		};
 
-		async function findSender() {
-			const result = await fetchHost();
-			setHostName(result);
-		}
-		findSender();
+		findHostName();
 	}, []);
 
 	/* 카톡처럼 구현
@@ -61,15 +51,22 @@ const Chat = (props) => {
 				onMouseOut={onMouseOut}
 			>
 				{toggleBox && (
-					<div
-						className="additionBox"
-						onMouseOver={onMouseOver2}
-						onMouseOut={onMouseOut2}
-					>
-						<div>like</div>
-						<div>dislike</div>
-						<div>edit</div>
-						<div>delete</div>
+					<div className="additionBox" toggle>
+						<div>
+							<img src={likeImg} className="addImg" alt="like" />
+						</div>
+						<div>
+							<img src={smileImg} className="addImg" alt="smile" />
+						</div>
+						<div>
+							<img src={sleepImg} className="addImg" alt="sleep" />
+						</div>
+						<div>
+							<img src={editImg} className="addImg" alt="edit" />
+						</div>
+						<div>
+							<img src={deleteImg} className="addImg" alt="delete" />
+						</div>
 					</div>
 				)}
 				<div className="messageWrapper myChat">
@@ -80,7 +77,30 @@ const Chat = (props) => {
 		);
 	} else if (chat.uidOfUser !== uuid) {
 		return (
-			<div className="chatBox otherChat">
+			<div
+				className="chatBox otherChat"
+				onMouseOver={onMouseOver}
+				onMouseOut={onMouseOut}
+			>
+				{toggleBox && (
+					<div className="additionBox" toggle>
+						<div>
+							<img src={likeImg} className="addImg" alt="like" />
+						</div>
+						<div>
+							<img src={smileImg} className="addImg" alt="smile" />
+						</div>
+						<div>
+							<img src={sleepImg} className="addImg" alt="sleep" />
+						</div>
+						<div>
+							<img src={editImg} className="addImg" alt="edit" />
+						</div>
+						<div>
+							<img src={deleteImg} className="addImg" alt="delete" />
+						</div>
+					</div>
+				)}
 				<div className="messageWrapper otherChat">
 					<div className="chatSender">{hostName}</div>
 					<div className="chatMessage">{chat.content}</div>

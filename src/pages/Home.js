@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setJwtToken, setEmail, setPassword, setUuid } from "../reducers/user";
 import { Link, useHistory } from "react-router-dom";
@@ -10,30 +10,32 @@ import "../chatting.css";
 const Home = () => {
 	const history = useHistory();
 	const dispatch = useDispatch();
+	const email = useSelector((state) => state.user.email);
+	const uid = useSelector((state) => state.user.uid);
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
 		const [email, password] = e.target.elements;
-		firebaseApp
-			.auth()
-			.signInWithEmailAndPassword(email.value, password.value)
-			.then((user) => {
-				const uid = (firebaseApp.auth().currentUser || {}).uid;
-				if (uid) {
-					alert("로그인되었습니다.");
-					dispatch(setEmail(email.value));
-					dispatch(setPassword(password.value));
-					dispatch(setUuid(uid));
-					history.push("/chat/main");
-				} else {
-					alert("error");
-				}
-			})
-			.catch((error) => {
-				alert("로그인 정보가 없습니다.");
-				var errorCode = error.code;
-				var errorMessage = error.message;
-			});
+		try {
+			await firebaseApp
+				.auth()
+				.signInWithEmailAndPassword(email.value, password.value);
+			const uid = (firebaseApp.auth().currentUser || {}).uid;
+			if (uid) {
+				alert("로그인되었습니다.");
+				dispatch(setEmail(email.value));
+				dispatch(setPassword(password.value));
+				dispatch(setUuid(uid));
+				history.push("/chat/main");
+			} else {
+				alert("error");
+			}
+		} catch (error) {
+			alert("로그인 정보가 없습니다.");
+			var errorCode = error.code;
+			var errorMessage = error.message;
+			console.log(errorMessage);
+		}
 	};
 
 	return (

@@ -41,6 +41,9 @@
 	font-weight: bold;
 	margin-top: 1rem;
 }
+.inputBox {
+	padding: 0 0.5rem;
+}
 .backBtn {
 	width: 100%;
 	padding: 0.75rem 0;
@@ -80,12 +83,19 @@
 }
 .formWrapper {
 	display: flex;
-	justify-content: flex-start;
+	justify-content: center;
 	margin-bottom: 3rem;
 	align-items: center;
 	width: auto;
+	padding: 0;
 }
 .formWrapper div {
+	margin-right: 1rem;
+	display: flex;
+	flex-direction: row;
+	/* align-items: center; */
+}
+.formWrapper div div {
 	margin-right: 1rem;
 }
 
@@ -96,6 +106,7 @@
 	flex-direction: column;
 	justify-content: center;
 	background-color: var(--background-color);
+	overflow: hidden;
 }
 
 .chat-area {
@@ -110,15 +121,21 @@
 	width: 94%;
 	height: 3rem;
 	padding: 0 1rem;
+	margin-right: 1rem;
 }
 
+.inputMessage:focus {
+	border-style: none !important;
+	border-radius: 15px;
+}
 .sendMessageWrapper {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 }
 .sendBtn {
-	width: 5%;
+	width: 7rem;
+	height: 3rem;
 }
 
 .chatBox {
@@ -175,6 +192,11 @@
 	border-radius: 20px;
 	background-color: var(--main3-color);
 }
+.lockBadge {
+	padding: 0.5rem 1.5rem;
+	font-size: 1.5rem;
+	border-radius: 5px;
+}
 .cardComponent {
 	flex: 1 1 30%;
 }
@@ -219,6 +241,15 @@
 	margin-top: 1rem;
 	margin-left: 1rem;
 }
+.inviteWrapper {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin-top: 1rem;
+	margin-right: 1rem;
+}
+.inviteBtn {
+}
 
 .enterBtn {
 	background-color: var(--main2-color);
@@ -235,13 +266,15 @@
 	display: flex;
 	flex-direction: row;
 	border: 1px solid #e3e3e3;
-	background-color: var(--main3-color);
+	/* background-color: var(--main3-color); */
+	background-color: white;
 	position: absolute;
 	width: auto;
-	height: 2.5rem;
-	margin-top: -1rem;
+	height: 3rem;
+	margin-top: -7rem;
 	right: 1rem;
 	border-radius: 5px;
+	box-shadow: 1px 1px 1px 1px #e3e3e3;
 }
 .additionBox div {
 	width: 4rem;
@@ -249,4 +282,34 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+.addImg {
+	width: 2rem;
+}
+
+.userListWrapper {
+	padding: 0.25rem 1rem;
+}
+.userBox {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #e3e3e3;
+	padding: 0.5rem 1rem;
+}
+
+.invite_userProfile {
+	width: 3rem;
+	height: 3rem;
+	font-size: 2rem;
+	line-height: 2rem;
+	padding: 0;
+}
+.invite_userName {
+	width: 80%;
+	margin: 0 1rem;
+}
+.invite_userimg {
+	width: 100%;
 }
