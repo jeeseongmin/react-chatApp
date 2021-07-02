@@ -208,13 +208,25 @@ const InviteModal = (props) => {
 			);
 		} else if (acceptList.indexOf(receiver) !== -1) {
 			return (
-				<Button variant="success" className="notUseBtn" uid={uid} rid={rid} receiver={receiver}>
+				<Button
+					variant="success"
+					className="notUseBtn"
+					uid={uid}
+					rid={rid}
+					receiver={receiver}
+				>
 					수락
 				</Button>
 			);
 		} else if (rejectList.indexOf(receiver) !== -1) {
 			return (
-				<Button variant="danger" className="notUseBtn" uid={uid} rid={rid} receiver={receiver}>
+				<Button
+					variant="danger"
+					className="notUseBtn"
+					uid={uid}
+					rid={rid}
+					receiver={receiver}
+				>
 					거절
 				</Button>
 			);

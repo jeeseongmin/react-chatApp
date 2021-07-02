@@ -10,13 +10,13 @@ import editImg from "../image/edit.png";
 import deleteImg from "../image/delete.png";
 
 const Chat = (props) => {
+	console.log(props);
 	const [hostName, setHostName] = useState();
 	console.timeLog("render chat" + props.chat.uid);
 	const chat = props.chat;
 	const uuid = props.uid;
 
 	const [toggleBox, setToggleBox] = useState(false);
-	const [toggleMe, setToggleMe] = useState(false);
 
 	const onMouseOver = () => {
 		setToggleBox(true);
@@ -25,8 +25,6 @@ const Chat = (props) => {
 	const onMouseOut = () => {
 		setToggleBox(false);
 	};
-
-	console.log(chat.uidOfUser);
 
 	useEffect(() => {
 		let findHostName = async function (req, res) {
@@ -83,7 +81,7 @@ const Chat = (props) => {
 				onMouseOut={onMouseOut}
 			>
 				{toggleBox && (
-					<div className="additionBox" toggle>
+					<div className="additionBox">
 						<div>
 							<img src={likeImg} className="addImg" alt="like" />
 						</div>

@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Button, Badge } from "react-bootstrap";
 import "../chatting.css";
 import { db, firebaseApp, firebase } from "../firebase";
+import EditRoomModal from "./EditRoomModal";
 
 const ChatRoom = (props) => {
 	// props로 받아오는 해당 room information
@@ -14,24 +15,28 @@ const ChatRoom = (props) => {
 	const deleteOne = props.deleteOne;
 
 	const enterRoom = props.enterRoom;
-	const [acceptRooms, setAcceptRooms] = useState([]);
+	// const [acceptRooms, setAcceptRooms] = useState([]);
+
+	const acceptRooms = props.acceptRooms;
+	const toggleState = props.toggleState;
+	// const [modalShow, setModalShow] = useState(false);
 
 	// 맨 앞 index 표시
 	const index = props.index * 1 + 1;
 	const history = useHistory();
 
-	useEffect(() => {
-		const acceptList = async function (req, res) {
-			let cp = await db
-				.collection("user")
-				.doc(uid)
-				.collection("invitation")
-				.doc("type")
-				.get();
-			setAcceptRooms(cp.data().acceptRoom);
-		};
-		acceptList();
-	}, []);
+	// useEffect(() => {
+	// 	const acceptList = async function (req, res) {
+	// 		let cp = await db
+	// 			.collection("user")
+	// 			.doc(uid)
+	// 			.collection("invitation")
+	// 			.doc("type")
+	// 			.get();
+	// 		setAcceptRooms(cp.data().acceptRoom);
+	// 	};
+	// 	acceptList();
+	// }, []);
 
 	// const enterChatRoom = (chatroomInfo) => {
 	// 	history.push("/chat/room/" + chatroomInfo.id);
@@ -40,7 +45,7 @@ const ChatRoom = (props) => {
 	const LockBadge = (e) => {
 		const info = e.isLock;
 		const rid = e.rid;
-		console.log(acceptRooms);
+		const tState = e.tState;
 
 		// if (acceptRooms.length > 0) {
 		// 	if (acceptRooms.indexOf(rid) !== -1) isInvited = true;
@@ -72,15 +77,19 @@ const ChatRoom = (props) => {
 
 	return (
 		<div className="chatroom">
+			{/* <EditRoomModal
+				show={modalShow}
+				onHide={() => setModalShow(false)}
+				uid={uid}
+				rid={chatroomInfo.id}
+				modalControl={setModalShow}
+			/> */}
 			<Badge variant="success" className="idBadge">
 				{index}
 			</Badge>
-
 			<LockBadge isLock={chatroomInfo.password} rid={chatroomInfo.id} />
-			<div className="">
-				<h4>{chatroomInfo.title}</h4>
-			</div>
-			<div className="">
+			<div className="chatRoomTitle">{chatroomInfo.title}</div>
+			<div className="chatRoomTitle">
 				{chatroomInfo.host.slice(0, chatroomInfo.host.indexOf("@"))}님의 채팅방
 			</div>
 			<div className="btnWrapper">
@@ -94,6 +103,7 @@ const ChatRoom = (props) => {
 				>
 					입장
 				</Button>
+
 				<Button
 					variant="danger"
 					className="deleteBtn"
@@ -114,9 +124,11 @@ const ChatRoom = (props) => {
 
 // 삭제했을 때에는 memo에 어떻게 적용시켜야 할까?
 const areEqual = (prevProps, nextProps) => {
-	// console.log(prevProps);
+	console.log(prevProps);
 	return (
-		prevProps.content === nextProps.content && prevProps.id === nextProps.id
+		prevProps.content === nextProps.content &&
+		prevProps.id === nextProps.id &&
+		prevProps.acceptRooms === nextProps.acceptRooms
 	);
 };
 

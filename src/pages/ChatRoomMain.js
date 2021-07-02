@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import Chat from "../components/Chat";
 import InviteModal from "../components/InviteModal";
+import EditRoomModal from "../components/EditRoomModal";
 
 const ChatRoomMain = () => {
 	const uid = useSelector((state) => state.user.uid);
@@ -22,19 +23,23 @@ const ChatRoomMain = () => {
 	const [chats, setChats] = useState([]);
 	const [modifyCandidate, setModifyCandidate] = useState(null);
 	const [newCandidate, setNewCandidate] = useState(null);
+	const [hostName, setHostName] = useState();
 	// const [peopleList, setPeopleList] = useState([]);
 
 	const [modalShow, setModalShow] = useState(false);
 
+	const [editModalShow, setEditModalShow] = useState(false);
+
 	// 맨 처음에 정보들 받아올 때.
 	useEffect(() => {
+		console.log("init");
 		let init = async function (req, res) {
 			try {
 				const doc = await db.collection("chatrooms").doc(rid).get();
 				if (doc.data()) {
-					const hostEmail = doc
-						.data()
-						.host.slice(0, doc.data().host.indexOf("@"));
+					// const hostEmail = doc
+					// 	.data()
+					// 	.host.slice(0, doc.data().host.indexOf("@"));
 					// 해당 방의 정보 임시저장.
 					setRoomInfo({
 						title: doc.data().title,
@@ -42,17 +47,21 @@ const ChatRoomMain = () => {
 						id: doc.data().id,
 						// 만든 사람
 						uidOfUser: doc.data().uidOfUser,
-						host: hostEmail,
+						host: doc.data().host,
 					});
+					// const _hostName = roomInfo.host;
+					// console.log(_hostName);
+					// await setHostName(roomInfo.host);
 				} else {
 					alert("방을 찾을 수 없습니다.");
 				}
 			} catch (error) {
+				console.log(error);
 				alert("데이터베이스 오류");
 			}
 		};
 		init();
-	}, []);
+	}, [modalShow, editModalShow]);
 
 	const goBack = () => {
 		history.goBack();
@@ -111,6 +120,7 @@ const ChatRoomMain = () => {
 				.collection("messages")
 				.orderBy("created")
 				.get();
+
 			snapshot.docChanges().forEach((change) => {
 				// 새로운 data일 때
 				if (change.type === "added") {
@@ -138,6 +148,13 @@ const ChatRoomMain = () => {
 
 	return (
 		<div className="chatRoomMainWrapper">
+			<EditRoomModal
+				show={editModalShow}
+				onHide={() => setEditModalShow(false)}
+				uid={uid}
+				roominfo={roomInfo}
+				key={roomInfo.id}
+			/>
 			<InviteModal
 				show={modalShow}
 				onHide={() => setModalShow(false)}
@@ -149,8 +166,15 @@ const ChatRoomMain = () => {
 					Back
 				</Button>
 			</div>
-			<div className="inviteWrapper">
-				{uid === roomInfo.uidOfUser && (
+			{uid === roomInfo.uidOfUser && (
+				<div className="inviteWrapper">
+					<Button
+						variant="warning"
+						onClick={() => setEditModalShow(true)}
+						className="editBtn"
+					>
+						수정
+					</Button>
 					<Button
 						variant="success"
 						className="inviteBtn"
@@ -158,8 +182,8 @@ const ChatRoomMain = () => {
 					>
 						+ 초대
 					</Button>
-				)}
-			</div>
+				</div>
+			)}
 			<h1>
 				{roomInfo.title} <Badge variant="primary">On</Badge>
 			</h1>
@@ -168,7 +192,7 @@ const ChatRoomMain = () => {
 				{/* {chatHistory} */}
 				{chats.map((chat, index) => {
 					if (index !== 0) {
-						return <Chat chat={chat} key={chat.id} uid={uid} />;
+						return <Chat chat={chat} key={index} uid={uid} />;
 					}
 				})}
 			</div>

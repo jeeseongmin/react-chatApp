@@ -10,6 +10,7 @@ import "../chatting.css";
 import { useSelector } from "react-redux";
 import ChatRoom from "../components/ChatRoom";
 import MyInvitationModal from "../components/MyInvitationModal";
+import EditRoomModal from "../components/EditRoomModal";
 
 const ChatMain = () => {
 	const email = useSelector((state) => state.user.email);
@@ -25,6 +26,8 @@ const ChatMain = () => {
 	});
 	const [payload, setPayload] = useState({});
 	const [modalShow, setModalShow] = useState(false);
+	const [toggleState, setToggleState] = useState(false);
+	const [acceptList, setAcceptList] = useState([]);
 
 	// 로그인 한 유저가 aceept 되어있는 목록
 
@@ -35,12 +38,27 @@ const ChatMain = () => {
 	};
 
 	useEffect(() => {
+		console.log("haha");
 		const setting = async function (req, res) {
 			let querySnapshot = await db.collection("chatrooms").get();
 			setChatrooms(querySnapshot.docs.map((doc) => doc.data()));
 		};
 		setting();
-	}, []);
+	}, [toggleState]);
+
+	useEffect(() => {
+		console.log("toggle~");
+		const getAcceptList = async function (req, res) {
+			let cp = await db
+				.collection("user")
+				.doc(uid)
+				.collection("invitation")
+				.doc("type")
+				.get();
+			setAcceptList(cp.data().acceptRoom);
+		};
+		getAcceptList();
+	}, [toggleState]);
 
 	const logOut = () => {
 		firebaseApp.auth().signOut();
@@ -49,8 +67,6 @@ const ChatMain = () => {
 	};
 
 	const addRooms = async (payload) => {
-		console.log("addRooms");
-		console.log(payload);
 		setPayload(payload);
 		try {
 			await db.collection("chatrooms").doc(payload.id).set({
@@ -110,8 +126,7 @@ const ChatMain = () => {
 	const enterChatRoom = async (chatroomInfo, acceptRooms) => {
 		const roomPasword = chatroomInfo.password;
 		// 패스워드를 입력했거나, 내가 초대된 방이면
-		console.log(acceptRooms);
-		if (acceptRooms) {
+		if (acceptRooms || chatroomInfo.password === "") {
 			history.push("/chat/room/" + chatroomInfo.id);
 		} else if (email !== chatroomInfo.host) {
 			const answer = prompt("방의 비밀번호를 입력해주세요.");
@@ -130,21 +145,165 @@ const ChatMain = () => {
 		const doc = await db.collection("chatrooms").doc(deleteId).get();
 		const deletePassword = doc.data().password;
 		if (email === doc.data().host) {
-			console.log(deletePassword);
 			const answer = prompt("비밀번호를 입력해주세요.");
 			if (answer === deletePassword) {
-				db.collection("chatrooms").doc(deleteId).delete();
-				alert("삭제되었습니다.");
-
 				const cp = chatrooms.filter(function (element) {
 					return element.id !== deleteId;
 				});
 				setChatrooms(cp);
+				console.log("delete?");
+				console.log(deleteId);
+				console.log(chatrooms);
+				await db.collection("chatrooms").doc(deleteId).delete();
+				alert("삭제되었습니다.");
 			} else {
 				alert("비밀번호가 틀렸습니다.");
 			}
 		} else {
 			alert("작성자만 삭제할 수 있습니다.");
+		}
+	};
+
+	const acceptInvite = async function (rid, uid, setWRoom, setARoom) {
+		console.log("haha");
+		// 먼저 방에 있는 거 뺴기.
+		try {
+			const cp_room = await db
+				.collection("chatrooms")
+				.doc(rid)
+				.collection("invitation")
+				.doc("type")
+				.get();
+			const wList = cp_room.data().waiting;
+			const aList = cp_room.data().accept;
+			const rList = cp_room.data().reject;
+
+			// 대기 리스트에서 빼기
+			const cp_wList = await wList.filter(function (element) {
+				return element !== uid;
+			});
+			console.log(cp_wList);
+
+			// 수락 리스트에 더하기.
+			const cp_aList = [...aList, uid];
+
+			await db
+				.collection("chatrooms")
+				.doc(rid)
+				.collection("invitation")
+				.doc("type")
+				.set({
+					waiting: cp_wList,
+					accept: cp_aList,
+					reject: rList,
+				});
+
+			// 유저 리스트 불러오기
+			const cp_user = await db
+				.collection("user")
+				.doc(uid)
+				.collection("invitation")
+				.doc("type")
+				.get();
+
+			const wList_user = cp_user.data().waitingRoom;
+			const aList_user = cp_user.data().acceptRoom;
+			const rList_user = cp_user.data().rejectRoom;
+
+			// 대기 리스트에서 빼기
+			const cp_wList_user = await wList_user.filter(function (element) {
+				return element !== rid;
+			});
+
+			// 수락 리스트에 더하기.
+			const cp_aList_user = [...aList_user, rid];
+			setWRoom(cp_wList_user);
+			setARoom(cp_aList_user);
+			await db
+				.collection("user")
+				.doc(uid)
+				.collection("invitation")
+				.doc("type")
+				.set({
+					waitingRoom: cp_wList_user,
+					acceptRoom: cp_aList_user,
+					rejectRoom: rList_user,
+				});
+			setToggleState(!toggleState);
+			alert("수락하였습니다.");
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const rejectInvite = async function (rid, uid, setWRoom, setRRoom) {
+		console.log(rid);
+
+		try {
+			const cp_room = await db
+				.collection("chatrooms")
+				.doc(rid)
+				.collection("invitation")
+				.doc("type")
+				.get();
+			const wList = cp_room.data().waiting;
+			const aList = cp_room.data().accept;
+			const rList = cp_room.data().reject;
+
+			// 대기 리스트에서 빼기
+			const cp_wList = await wList.filter(function (element) {
+				return element !== uid;
+			});
+
+			// 수락 리스트에 더하기.
+			const cp_rList = [...rList, uid];
+
+			await db
+				.collection("chatrooms")
+				.doc(rid)
+				.collection("invitation")
+				.doc("type")
+				.set({
+					waiting: cp_wList,
+					accept: aList,
+					reject: cp_rList,
+				});
+
+			// 유저 리스트 불러오기
+			const cp_user = await db
+				.collection("user")
+				.doc(uid)
+				.collection("invitation")
+				.doc("type")
+				.get();
+
+			const wList_user = cp_user.data().waitingRoom;
+			const aList_user = cp_user.data().acceptRoom;
+			const rList_user = cp_user.data().rejectRoom;
+
+			// 대기 리스트에서 빼기
+			const cp_wList_user = await wList_user.filter(function (element) {
+				return element !== rid;
+			});
+
+			// 수락 리스트에 더하기.
+			const cp_rList_user = [...rList_user, rid];
+			setWRoom(cp_wList_user);
+			setRRoom(cp_rList_user);
+			await db
+				.collection("user")
+				.doc(uid)
+				.collection("invitation")
+				.doc("type")
+				.set({
+					waitingRoom: cp_wList_user,
+					acceptRoom: aList_user,
+					rejectRoom: cp_rList_user,
+				});
+
+			alert("거절하였습니다.");
+		} catch (error) {
+			console.log(error);
 		}
 	};
 
@@ -154,6 +313,8 @@ const ChatMain = () => {
 				show={modalShow}
 				onHide={() => setModalShow(false)}
 				uid={uid}
+				acceptInvite={acceptInvite}
+				rejectInvite={rejectInvite}
 			/>
 			<div className="logoutWrapper">
 				<Button
@@ -218,6 +379,7 @@ const ChatMain = () => {
 							uid={uid}
 							deleteOne={deleteRoom}
 							enterRoom={enterChatRoom}
+							acceptRooms={acceptList}
 						/>
 					);
 					// 허락된 room들
