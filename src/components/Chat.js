@@ -25,21 +25,36 @@ const Chat = (props) => {
 	const editChat = props.editChat;
 	const rid = props.rid;
 	const [editChatModalShow, setEditChatModalShow] = useState(false);
-
 	const [chatInfo, setChatInfo] = useState({});
-	const [likeList, setLikeList] = useState([]);
-	const [likeFlag, setLikeFlag] = useState(false);
-
 	const [toggleBox, setToggleBox] = useState(false);
 
-	var like = {
+	const [likeList, setLikeList] = useState([]);
+	const [likeChange, setLikeChange] = useState(false);
+
+	const [prettyList, setPrettyList] = useState([]);
+	const [prettyChange, setPrettyChange] = useState(false);
+
+	const [scaryList, setScaryList] = useState([]);
+	const [scaryChange, setScaryChange] = useState(false);
+
+	var imoji = {
 		// likeList 불러오기
 		getList: async function () {
-			const querySnapshot = await this.getRef().get();
-			let _likeList = await querySnapshot.data().like;
-			setChatInfo(querySnapshot.data());
-			setLikeList(_likeList);
-			console.log(likeList);
+			try {
+				let querySnapshot = await this.getRef().get();
+				let _likeList = await querySnapshot.data().like;
+				setChatInfo(querySnapshot.data());
+				setLikeList(_likeList);
+				// 좋아요인 상태
+			} catch (error) {
+				await this.getRef().set({
+					uidOfUser: chatInfo.uidOfUser,
+					content: chatInfo.content,
+					created: chatInfo.created,
+					id: chatInfo.id,
+					like: [],
+				});
+			}
 		},
 
 		// 해당 chat에 대한 좋아요 reference 가져오기
@@ -55,8 +70,6 @@ const Chat = (props) => {
 		// 해당 chat에 대해 toggle 시키기
 		toggle: async function () {
 			if (likeList.includes(uuid)) {
-				alert("취소");
-				console.log("좋아요 취소!");
 				const deleteList = likeList.filter(function (element, index) {
 					return element !== uuid;
 				});
@@ -71,11 +84,8 @@ const Chat = (props) => {
 			}
 			// 좋아요 누르지 않은 상태라면, 좋아요 누르기
 			else {
-				alert("좋아요");
-				console.log("좋아요 하기");
 				const addList = likeList;
 				addList.push(uuid);
-				console.log(addList);
 
 				await this.getRef().set({
 					uidOfUser: chatInfo.uidOfUser,
@@ -85,17 +95,16 @@ const Chat = (props) => {
 					like: addList,
 				});
 			}
-
-			setLikeFlag(!likeFlag);
+			setLikeChange(!likeChange);
 		},
 	};
 
 	useEffect(() => {
-		like.getList();
-	}, [likeFlag]);
+		imoji.getList();
+	}, [likeChange]);
 
 	const likeToggle = function () {
-		like.toggle();
+		imoji.toggle();
 	};
 
 	useEffect(() => {
@@ -135,47 +144,14 @@ const Chat = (props) => {
 		findHostName();
 	}, []);
 
-	// const editModal = async (chat) => {
-	// 	setToggleBox(false);
-	// 	setEditChatModalShow(true);
-	// };
-
-	// 본인의 채팅이면 지울 수 있다.
-	// 방 주인도 지울 수 있다.
-	// const deleteChat = async () => {
-	// 	if (uuid === chat.uidOfUser || uuid === hostId) {
-	// 		alert("삭제하기");
-	// 		try {
-	// 			const chatRef = db
-	// 				.collection("chatrooms")
-	// 				.doc(rid)
-	// 				.collection("messages");
-	// 			console.log(chat.id);
-	// 			const snapshot = await chatRef.doc(chat.docId).get();
-	// 			if (snapshot.empty) {
-	// 				alert("없음");
-	// 				return;
-	// 			} else {
-	// 				await chatRef.doc(chat.docId).delete();
-	// 				alert("삭제되었습니다!");
-	// 				setIsChanged(!isChanged);
-	// 			}
-	// 		} catch (error) {}
-	// 	} else {
-	// 		alert("권한이 없습니다.");
-	// 		return 0;
-	// 	}
-	// };
-
-	/* 카톡처럼 구현
-	본인 것이면 우측에 놓기
-	다른 사람 것이면 좌측에 놓기
-	*/
-
 	if (chat.uidOfUser === uuid) {
 		return (
 			<div
-				className="chatBox myChat"
+				className={
+					likeList.length === 0
+						? "chatBox myChat emptyChatBox"
+						: "chatBox myChat"
+				}
 				onMouseOver={onMouseOver}
 				onMouseLeave={onMouseOut}
 			>
@@ -189,7 +165,13 @@ const Chat = (props) => {
 				{toggleBox && (
 					<div className="imojiMyWrapper">
 						<div className="imojiBox" toggle>
-							<div className="imojiImgWrapper">
+							<div
+								className={
+									likeList.includes(uuid)
+										? "imojiToggleOn imojiImgWrapper"
+										: "imojiToggleOff imojiImgWrapper"
+								}
+							>
 								<img
 									src={likeImg}
 									className="imojiImg"
@@ -235,12 +217,54 @@ const Chat = (props) => {
 				<div className="messageWrapper myChat">
 					<div>
 						<div className="chatSender">{hostName}</div>
-						<span className="imojiView">
-							<Button>like</Button>
-							<Button>sleep</Button>
-							<Button>haha</Button>
-						</span>
 						<span className="chatMessage">{chat.content}</span>
+						<div className="imojiView">
+							{likeList.length !== 0 && (
+								<Button
+									className={
+										likeList.includes(uuid) ? "myimoji imojiBtn" : "imojiBtn"
+									}
+								>
+									<img
+										src={likeImg}
+										className="viewImojiImg"
+										alt="like"
+										onClick={likeToggle}
+									/>
+									<span className="imojiCount">{likeList.length}</span>
+								</Button>
+							)}
+							{likeList.length !== 0 && (
+								<Button
+									className={
+										likeList.includes(uuid) ? "myimoji imojiBtn" : "imojiBtn"
+									}
+								>
+									<img
+										src={likeImg}
+										className="viewImojiImg"
+										alt="like"
+										onClick={likeToggle}
+									/>
+									<span className="imojiCount">{likeList.length}</span>
+								</Button>
+							)}
+							{likeList.length !== 0 && (
+								<Button
+									className={
+										likeList.includes(uuid) ? "myimoji imojiBtn" : "imojiBtn"
+									}
+								>
+									<img
+										src={likeImg}
+										className="viewImojiImg"
+										alt="like"
+										onClick={likeToggle}
+									/>
+									<span className="imojiCount">{likeList.length}</span>
+								</Button>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -248,7 +272,11 @@ const Chat = (props) => {
 	} else if (chat.uidOfUser !== uuid) {
 		return (
 			<div
-				className="chatBox otherChat"
+				className={
+					likeList.length === 0
+						? "chatBox otherChat emptyChatBox"
+						: "chatBox otherChat"
+				}
 				onMouseOver={onMouseOver}
 				onMouseLeave={onMouseOut}
 			>
@@ -262,7 +290,13 @@ const Chat = (props) => {
 				{toggleBox && (
 					<div className="imojiOtherWrapper">
 						<div className="imojiBox" toggle>
-							<div className="imojiImgWrapper">
+							<div
+								className={
+									likeList.includes(uuid)
+										? "imojiToggleOn imojiImgWrapper"
+										: "imojiToggleOff imojiImgWrapper"
+								}
+							>
 								<img
 									src={likeImg}
 									className="imojiImg"
@@ -309,11 +343,53 @@ const Chat = (props) => {
 					<div>
 						<div className="chatSender">{hostName}</div>
 						<span className="chatMessage">{chat.content}</span>
-						<span className="imojiView">
-							<Button>like</Button>
-							<Button>sleep</Button>
-							<Button>haha</Button>
-						</span>
+						<div className="imojiView">
+							{likeList.length !== 0 && (
+								<Button
+									className={
+										likeList.includes(uuid) ? "myimoji imojiBtn" : "imojiBtn"
+									}
+								>
+									<img
+										src={likeImg}
+										className="viewImojiImg"
+										alt="like"
+										onClick={likeToggle}
+									/>
+									<span className="imojiCount">{likeList.length}</span>
+								</Button>
+							)}
+							{likeList.length !== 0 && (
+								<Button
+									className={
+										likeList.includes(uuid) ? "myimoji imojiBtn" : "imojiBtn"
+									}
+								>
+									<img
+										src={likeImg}
+										className="viewImojiImg"
+										alt="like"
+										onClick={likeToggle}
+									/>
+									<span className="imojiCount">{likeList.length}</span>
+								</Button>
+							)}
+							{likeList.length !== 0 && (
+								<Button
+									className={
+										likeList.includes(uuid) ? "myimoji imojiBtn" : "imojiBtn"
+									}
+								>
+									<img
+										src={likeImg}
+										className="viewImojiImg"
+										alt="like"
+										onClick={likeToggle}
+									/>
+									<span className="imojiCount">{likeList.length}</span>
+								</Button>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>

@@ -32,6 +32,24 @@ const ChatRoomMain = () => {
 
 	const [isChanged, setIsChanged] = useState(false);
 
+	// useEffect(() => {
+	// 	const getChats = async function () {
+	// 		const querySnapshot = await db
+	// 			.collection("chatrooms")
+	// 			.doc(rid)
+	// 			.collection("messages")
+	// 			.get();
+	// 		console.log("docdoc");
+	// 		const cp = querySnapshot.docs.map((doc) => {
+	// 			var obj = doc.data();
+	// 			obj["docId"] = doc.id;
+	// 			return obj;
+	// 		});
+	// 		setChats(cp);
+	// 	};
+	// 	getChats();
+	// }, []);
+
 	// 맨 처음에 정보들 받아올 때.
 	useEffect(() => {
 		let init = async function (req, res) {
@@ -87,6 +105,7 @@ const ChatRoomMain = () => {
 			content: text,
 			id: uuidv4(),
 			created: firebase.firestore.Timestamp.now().seconds,
+			like: [],
 		};
 		const doc = await db
 			.collection("chatrooms")
@@ -100,6 +119,7 @@ const ChatRoomMain = () => {
 		setChats(cp);
 		setText("");
 		scrollToBottom();
+		setIsChanged(!isChanged);
 	};
 
 	useEffect(() => {
@@ -126,6 +146,7 @@ const ChatRoomMain = () => {
 					.collection("messages")
 					.doc(chat.docId)
 					.delete();
+				setIsChanged(!isChanged);
 			} catch (error) {
 				console.log(error);
 				alert("에러!");
@@ -176,7 +197,7 @@ const ChatRoomMain = () => {
 		};
 
 		onChange();
-	}, []);
+	}, [isChanged]);
 
 	return (
 		<div className="chatRoomMainWrapper">
@@ -223,6 +244,7 @@ const ChatRoomMain = () => {
 			<div className="chat-area" ref={chatBox}>
 				{/* {chatHistory} */}
 				{chats.map((chat, index) => {
+					console.log(chats);
 					if (index !== 0) {
 						return (
 							<Chat
