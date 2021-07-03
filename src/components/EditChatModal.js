@@ -66,10 +66,13 @@ const EditChatModal = (props) => {
 					.doc(chat.docId)
 					.set(payload)
 					.then(() => {
-						alert("수정되었습니다.");
+						// alert("수정되었습니다.");
 						setChatInfo({
 							...payload,
 							docId: chat.docId,
+						});
+						setEditChat({
+							content: "",
 						});
 						goBack(true);
 					});

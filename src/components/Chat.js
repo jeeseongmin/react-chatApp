@@ -17,8 +17,6 @@ const Chat = (props) => {
 	// console.timeLog("render chat : " + props.chat.id);
 	const chats = props.chats;
 	const _chat = props.chat;
-	console.log("chat");
-	console.log(_chat);
 	const [chat, setChat] = useState({
 		..._chat,
 	});
@@ -28,7 +26,84 @@ const Chat = (props) => {
 	const rid = props.rid;
 	const [editChatModalShow, setEditChatModalShow] = useState(false);
 
+	const [isLike, setIsLike] = useState(false);
+
 	const [toggleBox, setToggleBox] = useState(false);
+
+	var like = {
+		state: isLike,
+		docId: chat.docId,
+		uidOfUser: uuid,
+
+		// like 상태 값 저장
+		init: function () {
+			console.log("init");
+			setIsLike(this.getState());
+		},
+
+		// 해당 chat에 대한 좋아요 reference 가져오기
+		getRef: function () {
+			console.log("getRef");
+			try {
+				let ref = db
+					.collection("chatrooms")
+					.doc(rid)
+					.collection("messages")
+					.doc(this.docId);
+				return ref;
+			} catch (error) {
+				console.log(error);
+			}
+		},
+
+		// 해당 chat에 대한 유저의 좋아요 상태값 가져오기
+		getState: async function () {
+			console.log("getState");
+			try {
+				const querySnapshot = await this.getRef().get();
+				const likeList = querySnapshot.docs.map((doc) => doc.data());
+
+				console.log(querySnapshot);
+				// console.log(likeRef.data());
+				console.log(likeList);
+				// 좋아요 항목에 있을 때
+				// if (likeList.inclues(this.uidOfUser)) {
+				// 	return true;
+				// }
+				// // 좋아요 항목에 없을 때
+				// else {
+				// 	return false;
+				// }
+				return likeList;
+			} catch (error) {
+				console.log("like 없음!!");
+				// const querySnapshot = await this.getRef().get();
+				// const likeList = querySnapshot.docs.map((doc) => doc.data());
+
+				return true;
+			}
+		},
+
+		// 해당 chat에 대해 toggle 시키기
+		toggle: async function () {
+			console.log("toggle");
+			// 좋아요 되어있는 상태
+			// console.log(this.state);
+			if (this.state) {
+				// await this.getRef().update({});
+				// console.log(this);
+			}
+			// 좋아요 되어있지 않은 상태
+			else {
+				console.log("false");
+			}
+		},
+	};
+
+	useEffect(() => {
+		like.init();
+		like.toggle();
+	}, []);
 
 	useEffect(() => {
 		let reloadContent = async function () {
@@ -39,13 +114,13 @@ const Chat = (props) => {
 				.doc(chat.docId)
 				.get();
 			const newContent = doc.data().content;
-			console.log(newContent);
 			setChat({
 				...chat,
 				content: newContent,
 			});
 		};
 		reloadContent();
+		setToggleBox(false);
 	}, [editChatModalShow]);
 
 	const onMouseOver = () => {
@@ -67,10 +142,10 @@ const Chat = (props) => {
 		findHostName();
 	}, []);
 
-	const editModal = async (chat) => {
-		setToggleBox(false);
-		setEditChatModalShow(true);
-	};
+	// const editModal = async (chat) => {
+	// 	setToggleBox(false);
+	// 	setEditChatModalShow(true);
+	// };
 
 	// 본인의 채팅이면 지울 수 있다.
 	// 방 주인도 지울 수 있다.
@@ -150,7 +225,7 @@ const Chat = (props) => {
 									src={editImg}
 									className="imojiImg"
 									alt="edit"
-									onClick={() => editModal(chat)}
+									onClick={() => setEditChatModalShow(true)}
 								/>
 							</div>
 							<div className="imojiImgWrapper">
@@ -184,6 +259,13 @@ const Chat = (props) => {
 				onMouseOver={onMouseOver}
 				onMouseLeave={onMouseOut}
 			>
+				<EditChatModal
+					show={editChatModalShow}
+					onHide={() => setEditChatModalShow(false)}
+					uid={uuid}
+					chat={chat}
+					rid={rid}
+				/>
 				{toggleBox && (
 					<div className="imojiOtherWrapper">
 						<div className="imojiBox" toggle>
@@ -216,7 +298,7 @@ const Chat = (props) => {
 									src={editImg}
 									className="imojiImg"
 									alt="edit"
-									onClick={() => editChat(chat)}
+									onClick={() => setEditChatModalShow(true)}
 								/>
 							</div>
 							<div className="imojiImgWrapper">
@@ -247,9 +329,6 @@ const Chat = (props) => {
 };
 
 const areEqual = (prevProps, nextProps) => {
-	console.log("prevProps");
-	console.log(prevProps);
-
 	return (
 		prevProps.chats === nextProps.chats &&
 		prevProps.chat === nextProps.chat &&
