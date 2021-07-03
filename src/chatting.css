@@ -119,6 +119,8 @@
 	border-radius: 20px;
 	height: 37rem;
 	overflow: auto;
+	padding: 1rem 0;
+	padding-top: 2rem;
 }
 
 .inputMessage {
@@ -144,11 +146,13 @@
 
 .chatBox {
 	width: 100%;
-	border-radius: 15px;
-	height: 7rem;
+	height: 8rem;
 	display: flex;
+	flex-direction: column;
+	justify-content: flex-end !important;
 	align-items: center;
-	margin-bottom: 1rem;
+	padding-bottom: 0.5rem;
+	margin-bottom: 0rem;
 }
 .chatBox:hover {
 	background-color: var(--main2-color);
@@ -158,18 +162,25 @@
 	max-width: 100%;
 	padding: 0.75rem 1rem;
 	border-radius: 20px;
+	text-align: center;
+	/* margin-bottom: 1rem; */
 }
 .messageWrapper {
-	max-width: 70%;
+	/* max-width: 70%; */
 	text-align: left;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
 }
 
 .chatSender {
 	padding: 0.5rem;
+	margin-bottom: 1rem;
 }
 .myChat {
 	justify-content: flex-end;
 	text-align: right;
+	float: right;
 }
 .otherChat {
 	justify-content: flex-start;
@@ -273,32 +284,53 @@
 	background-color: var(--red-color);
 	border-color: var(--red-color);
 }
+.imojiMyWrapper {
+	width: 100%;
+	background-color: none;
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 1rem;
+	padding-right: 1rem;
+}
+.imojiOtherWrapper {
+	width: 100%;
+	background-color: none;
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 1rem;
 
-.additionBox {
+	padding-left: 1rem;
+}
+.imojiBox {
 	display: flex;
 	flex-direction: row;
 	border: 1px solid #e3e3e3;
 	/* background-color: var(--main3-color); */
 	background-color: white;
-	width: auto;
+	width: 20rem;
 	height: 3rem;
-	margin-top: -7rem;
 	/* right: 1rem; */
 	border-radius: 5px;
 	box-shadow: 1px 1px 1px 1px #e3e3e3;
-	border: 1px solid red;
 }
-.additionBox div {
+.imojiBox div {
 	width: 4rem;
 	border-radius: 5px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
-.addImg {
+
+.imojiView {
+	margin: 0 1rem;
+	visibility: hidden;
+}
+.imojiImg {
 	width: 2rem;
 }
-
+.imojiImgWrapper:hover {
+	background-color: #e3e3e3;
+}
 .userListWrapper,
 .myDivWrapper {
 	padding: 0.25rem 1rem;
@@ -308,6 +340,11 @@
 .editRoomWrapper {
 	padding: 0.25rem 1rem;
 	height: 13rem;
+	overflow-y: auto;
+}
+.editChattingWrapper {
+	padding: 0.25rem 1rem;
+	height: 18rem;
 	overflow-y: auto;
 }
 .userBox,
@@ -328,6 +365,14 @@
 	border-bottom: 1px solid #e3e3e3;
 	padding: 0.5rem 1rem;
 	height: 9rem;
+}
+.editChatBox {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.5rem 1rem;
+	height: 13em;
 }
 
 .invite_userProfile {
@@ -368,6 +413,32 @@
 .editInfoWrapper div {
 	width: 100%;
 }
+.editChatWrapper {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+}
+.editChatWrapper div {
+	width: 100%;
+	margin: 0.5rem 0;
+}
+.editChatText {
+	width: 10rem;
+	display: inline-block;
+	margin-right: 1rem;
+	font-weight: bold;
+}
+
+.editChatInput {
+	width: 100%;
+	border-style: none;
+	border-bottom: 1px solid #e3e3e3;
+	padding: 0.5rem 0.5rem;
+	cursor: pointer;
+}
+
 .senderNameWrapper h5 {
 	overflow: hidden;
 	white-space: nowrap;

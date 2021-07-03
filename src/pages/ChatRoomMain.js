@@ -30,17 +30,14 @@ const ChatRoomMain = () => {
 
 	const [editModalShow, setEditModalShow] = useState(false);
 
+	const [isChanged, setIsChanged] = useState(false);
+
 	// 맨 처음에 정보들 받아올 때.
 	useEffect(() => {
-		console.log("init");
 		let init = async function (req, res) {
 			try {
 				const doc = await db.collection("chatrooms").doc(rid).get();
 				if (doc.data()) {
-					// const hostEmail = doc
-					// 	.data()
-					// 	.host.slice(0, doc.data().host.indexOf("@"));
-					// 해당 방의 정보 임시저장.
 					setRoomInfo({
 						title: doc.data().title,
 						password: doc.data().password,
@@ -49,9 +46,6 @@ const ChatRoomMain = () => {
 						uidOfUser: doc.data().uidOfUser,
 						host: doc.data().host,
 					});
-					// const _hostName = roomInfo.host;
-					// console.log(_hostName);
-					// await setHostName(roomInfo.host);
 				} else {
 					alert("방을 찾을 수 없습니다.");
 				}
@@ -80,26 +74,31 @@ const ChatRoomMain = () => {
 
 	// 메시지를 보내는 함수.
 	const sendMessage = async () => {
+		/* 
+			예제에서는 이 부분이 없어서 생각해보다가 
+			각 chatroom에 messages라는 collection을 만드는 것이 맞다고 생각했다.
+		*/
+		if (text === "") {
+			alert("메시지를 입력하세요");
+			return;
+		}
 		const payload = {
 			uidOfUser: uid,
 			content: text,
 			id: uuidv4(),
 			created: firebase.firestore.Timestamp.now().seconds,
 		};
-		/* 
-			예제에서는 이 부분이 없어서 생각해보다가 
-			각 chatroom에 messages라는 collection을 만드는 것이 맞다고 생각했다.
-		*/
-		await db
+		const doc = await db
 			.collection("chatrooms")
 			.doc(rid)
 			.collection("messages")
 			.add(payload);
 		// message 창 초기화
-		setText("");
+		payload.docId = doc.id;
 		const cp = [...chats];
 		cp.push(payload);
 		setChats(cp);
+		setText("");
 		scrollToBottom();
 	};
 
@@ -109,6 +108,39 @@ const ChatRoomMain = () => {
 		setChats(cp);
 		// scrollToBottom();
 	}, [newCandidate]);
+
+	const deleteChat = async (chat) => {
+		if (uid === chat.uidOfUser || uid === roomInfo.uidOfUser) {
+			const deleteId = chat.id;
+			const cp = chats.filter(function (element, index) {
+				if (index !== 0) {
+					return element.id !== deleteId;
+				} else return true;
+			});
+			setChats(cp);
+			try {
+				// alert(rid + " 성공적! " + chat.docId);
+				await db
+					.collection("chatrooms")
+					.doc(rid)
+					.collection("messages")
+					.doc(chat.docId)
+					.delete();
+			} catch (error) {
+				console.log(error);
+				alert("에러!");
+			}
+		} else {
+			alert("권한이 없습니다.");
+			return 0;
+		}
+	};
+
+	// 내용 변경
+	const editChat = async (chat) => {
+		console.log(chat);
+		alert("haha");
+	};
 
 	useEffect(() => {
 		// 초기화를 해줘야 쌓이지 않는다.
@@ -125,14 +157,14 @@ const ChatRoomMain = () => {
 				// 새로운 data일 때
 				if (change.type === "added") {
 					const newEntry = change.doc.data();
-					newEntry.id = change.doc.id;
+					newEntry.docId = change.doc.id;
 					setNewCandidate(newEntry);
 					console.log("added!");
 				}
 				// 수정된 data일 때
 				if (change.type === "modified") {
 					const data = change.doc.data();
-					data.id = change.doc.id;
+					data.docId = change.doc.id;
 					setModifyCandidate(data);
 				}
 				// 제거된 data일 때
@@ -192,7 +224,17 @@ const ChatRoomMain = () => {
 				{/* {chatHistory} */}
 				{chats.map((chat, index) => {
 					if (index !== 0) {
-						return <Chat chat={chat} key={index} uid={uid} />;
+						return (
+							<Chat
+								chat={chat}
+								key={index}
+								uid={uid}
+								rid={rid}
+								hostId={roomInfo.uidOfUser}
+								deleteChat={deleteChat}
+								chats={chats}
+							/>
+						);
 					}
 				})}
 			</div>

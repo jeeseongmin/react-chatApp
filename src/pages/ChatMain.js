@@ -10,7 +10,6 @@ import "../chatting.css";
 import { useSelector } from "react-redux";
 import ChatRoom from "../components/ChatRoom";
 import MyInvitationModal from "../components/MyInvitationModal";
-import EditRoomModal from "../components/EditRoomModal";
 
 const ChatMain = () => {
 	const email = useSelector((state) => state.user.email);
@@ -38,7 +37,6 @@ const ChatMain = () => {
 	};
 
 	useEffect(() => {
-		console.log("haha");
 		const setting = async function (req, res) {
 			let querySnapshot = await db.collection("chatrooms").get();
 			setChatrooms(querySnapshot.docs.map((doc) => doc.data()));

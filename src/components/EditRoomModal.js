@@ -5,7 +5,6 @@ import { db, firebaseApp, firebase } from "../firebase";
 import guestImg from "../image/guest.png";
 
 const EditRoomModal = (props) => {
-	console.log(props);
 	const uid = props.uid;
 	const _roomInfo = props.roominfo;
 
