@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import { db, firebase, firebaseApp } from "../firebase";
+import { db, firebase } from "../firebase";
 import { Button, Card, Badge } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../chatting.css";
@@ -15,7 +15,7 @@ const ChatRoomMain = () => {
 	const chatBox = useRef(null);
 	const history = useHistory();
 	const { rid } = useParams();
-	// const _roomId = "room_" + roomId;
+
 	const [roomInfo, setRoomInfo] = useState({});
 
 	const [text, setText] = useState("");
@@ -24,31 +24,12 @@ const ChatRoomMain = () => {
 	const [modifyCandidate, setModifyCandidate] = useState(null);
 	const [newCandidate, setNewCandidate] = useState(null);
 	const [hostName, setHostName] = useState();
-	// const [peopleList, setPeopleList] = useState([]);
 
 	const [modalShow, setModalShow] = useState(false);
 
 	const [editModalShow, setEditModalShow] = useState(false);
 
 	const [isChanged, setIsChanged] = useState(false);
-
-	// useEffect(() => {
-	// 	const getChats = async function () {
-	// 		const querySnapshot = await db
-	// 			.collection("chatrooms")
-	// 			.doc(rid)
-	// 			.collection("messages")
-	// 			.get();
-	// 		console.log("docdoc");
-	// 		const cp = querySnapshot.docs.map((doc) => {
-	// 			var obj = doc.data();
-	// 			obj["docId"] = doc.id;
-	// 			return obj;
-	// 		});
-	// 		setChats(cp);
-	// 	};
-	// 	getChats();
-	// }, []);
 
 	// 맨 처음에 정보들 받아올 때.
 	useEffect(() => {
@@ -106,6 +87,8 @@ const ChatRoomMain = () => {
 			id: uuidv4(),
 			created: firebase.firestore.Timestamp.now().seconds,
 			like: [],
+			cuty: [],
+			scary: [],
 		};
 		const doc = await db
 			.collection("chatrooms")
@@ -119,7 +102,6 @@ const ChatRoomMain = () => {
 		setChats(cp);
 		setText("");
 		scrollToBottom();
-		setIsChanged(!isChanged);
 	};
 
 	useEffect(() => {
@@ -146,7 +128,7 @@ const ChatRoomMain = () => {
 					.collection("messages")
 					.doc(chat.docId)
 					.delete();
-				setIsChanged(!isChanged);
+				// setIsChanged(!isChanged);
 			} catch (error) {
 				console.log(error);
 				alert("에러!");
@@ -155,12 +137,6 @@ const ChatRoomMain = () => {
 			alert("권한이 없습니다.");
 			return 0;
 		}
-	};
-
-	// 내용 변경
-	const editChat = async (chat) => {
-		console.log(chat);
-		alert("haha");
 	};
 
 	useEffect(() => {
@@ -197,7 +173,7 @@ const ChatRoomMain = () => {
 		};
 
 		onChange();
-	}, [isChanged]);
+	}, []);
 
 	return (
 		<div className="chatRoomMainWrapper">
@@ -244,7 +220,6 @@ const ChatRoomMain = () => {
 			<div className="chat-area" ref={chatBox}>
 				{/* {chatHistory} */}
 				{chats.map((chat, index) => {
-					console.log(chats);
 					if (index !== 0) {
 						return (
 							<Chat

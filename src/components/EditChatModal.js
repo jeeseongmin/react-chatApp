@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Button, Modal, Badge, Accordion, Card } from "react-bootstrap";
 import _default from "react-bootstrap/esm/CardColumns";
 import { db, firebaseApp, firebase } from "../firebase";
-import guestImg from "../image/guest.png";
 
 const EditChatModal = (props) => {
 	const uid = props.uid;
@@ -24,16 +23,6 @@ const EditChatModal = (props) => {
 		setEditChat(cp);
 	};
 
-	useEffect(() => {
-		const setting = async function (req, res) {
-			try {
-			} catch (error) {
-				console.log("오류있어요");
-			}
-		};
-		// setting();
-	}, []);
-
 	const goBack = async function (type) {
 		if (!type) {
 			setEditChat({
@@ -42,7 +31,6 @@ const EditChatModal = (props) => {
 			});
 		}
 		props.onHide(false);
-		// await setEditModalShow(false);
 	};
 
 	const submit = async function (chat) {
@@ -129,9 +117,9 @@ const EditChatModal = (props) => {
 						>
 							수정
 						</Button>
-						{/* <Button variant="danger" onClick={() => goBack(false)}>
+						<Button variant="danger" onClick={() => goBack(false)}>
 							취소
-						</Button> */}
+						</Button>
 					</div>
 				</div>
 			</Modal.Body>

@@ -3,7 +3,7 @@ import { Button, Modal, Badge, Accordion, Card } from "react-bootstrap";
 import _default from "react-bootstrap/esm/CardColumns";
 import { db, firebaseApp, firebase } from "../firebase";
 import guestImg from "../image/guest.png";
-
+import MyInvitationComp from "../components/MyInvitationComp";
 const MyInvitationModal = (props) => {
 	const uid = props.uid;
 
@@ -13,6 +13,7 @@ const MyInvitationModal = (props) => {
 	const [rRoom, setRRoom] = useState([]);
 	const acceptInvite = props.acceptInvite;
 	const rejectInvite = props.rejectInvite;
+	const [userInfo, setUserInfo] = useState({});
 
 	useEffect(() => {
 		const setting = async function (req, res) {
@@ -31,7 +32,6 @@ const MyInvitationModal = (props) => {
 				.doc("type")
 				.get();
 			setWRoom(cp.data().waitingRoom);
-			console.log(cp.data());
 		};
 		getWatingList();
 	}, []);
@@ -77,26 +77,14 @@ const MyInvitationModal = (props) => {
 			<Modal.Body>
 				<div className="myDivWrapper">
 					{chatrooms.map((room, index) => {
-						if (wRoom.indexOf(room.id) !== -1) {
+						if (wRoom.includes(room.id)) {
 							return (
 								<div className="divBox">
-									<div>
-										<Badge variant="success" className="invite_userProfile">
-											<img
-												alt="guest"
-												src={guestImg}
-												className="invite_userimg"
-											/>
-										</Badge>
-									</div>
-									<div className="senderNameWrapper">
-										<h5>
-											<b>[{room.title}]</b>
-										</h5>
-										<h5>
-											<b>{room.host}님이 초대하셨습니다.</b>
-										</h5>
-									</div>
+									<MyInvitationComp
+										id={room.uidOfUser}
+										title={room.title}
+										type={1}
+									/>
 									<div className="myDivBtnWrapper">
 										<Button
 											variant="success"

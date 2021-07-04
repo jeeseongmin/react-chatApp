@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setJwtToken, setEmail, setPassword, setUuid } from "../reducers/user";
+import { setEmail, setPassword, setUuid } from "../reducers/user";
 import { Link, useHistory } from "react-router-dom";
 import { firebaseApp } from "../firebase";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -10,8 +10,6 @@ import "../chatting.css";
 const Home = () => {
 	const history = useHistory();
 	const dispatch = useDispatch();
-	const email = useSelector((state) => state.user.email);
-	const uid = useSelector((state) => state.user.uid);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();

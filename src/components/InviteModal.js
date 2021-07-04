@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Button, Modal, Badge } from "react-bootstrap";
 import _default from "react-bootstrap/esm/CardColumns";
-import { db, firebaseApp, firebase } from "../firebase";
-import guestImg from "../image/guest.png";
+import { db } from "../firebase";
+// import guestImg from "../image/guest.png";
+import MyInvitationComp from "../components/MyInvitationComp";
+
 const InviteModal = (props) => {
 	const uid = props.uid;
 	const rid = props.rid;
@@ -12,9 +14,6 @@ const InviteModal = (props) => {
 	const [acceptList, setAcceptList] = useState([]);
 	const [rejectList, setRejectList] = useState([]);
 
-	const [userWaiting, setUserWaiting] = useState([]);
-	const [userAccept, setUserAccept] = useState([]);
-	const [userReject, setUserReject] = useState([]);
 	useEffect(() => {
 		const listing = async function () {
 			try {
@@ -24,7 +23,6 @@ const InviteModal = (props) => {
 					.collection("invitation")
 					.doc("type")
 					.get();
-				console.log(cp.data());
 				const wList = cp.data().waiting;
 				setWaitingList(wList);
 				const aList = cp.data().accept;
@@ -131,7 +129,6 @@ const InviteModal = (props) => {
 		// indexOf가 -1이면 없는 것
 		// 대기순위에 있으면 ㄱㄱ
 		if (waitingList.indexOf(receiver) !== -1) {
-			console.log("back test");
 			const cp = await waitingList.filter(function (element) {
 				return element !== receiver;
 			});
@@ -256,20 +253,7 @@ const InviteModal = (props) => {
 						if (person.uid !== uid) {
 							return (
 								<div className="userBox">
-									<div>
-										<Badge variant="success" className="invite_userProfile">
-											<img
-												alt="guest"
-												src={guestImg}
-												className="invite_userimg"
-											/>
-										</Badge>
-									</div>
-									<div className="invite_userName">
-										<h5>
-											<b>{person.email}</b>
-										</h5>
-									</div>
+									<MyInvitationComp id={uid} receiver={person.uid} type={2} />
 									<div>
 										<InviteButton person={person} uid={uid} rid={rid} />
 									</div>

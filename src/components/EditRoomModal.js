@@ -26,8 +26,6 @@ const EditRoomModal = (props) => {
 	useEffect(() => {
 		const setting = async function (req, res) {
 			try {
-				// let querySnapshot = await db.collection("chatrooms").doc(rid).get();
-				// setRoomInfo(querySnapshot.data());
 				setEditInfo({
 					title: roomInfo.title,
 					password: "",
@@ -35,7 +33,7 @@ const EditRoomModal = (props) => {
 					edited: "",
 				});
 			} catch (error) {
-				console.log("오류있어요");
+				console.log(error);
 			}
 		};
 		setting();
@@ -166,8 +164,6 @@ const EditRoomModal = (props) => {
 
 // 삭제했을 때에는 memo에 어떻게 적용시켜야 할까?
 const areEqual = (prevProps, nextProps) => {
-	// console.log("prevProps");
-	// console.log(prevProps.roominfo);
 	return (
 		prevProps.roominfo === nextProps.roominfo &&
 		prevProps.show === nextProps.show

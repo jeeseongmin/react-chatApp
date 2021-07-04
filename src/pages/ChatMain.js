@@ -10,6 +10,7 @@ import "../chatting.css";
 import { useSelector } from "react-redux";
 import ChatRoom from "../components/ChatRoom";
 import MyInvitationModal from "../components/MyInvitationModal";
+import guest from "../image/guest.png";
 
 const ChatMain = () => {
 	const email = useSelector((state) => state.user.email);
@@ -23,12 +24,23 @@ const ChatMain = () => {
 		title: "",
 		password: "",
 	});
+	const [userInfo, setUserInfo] = useState({});
 	const [payload, setPayload] = useState({});
 	const [modalShow, setModalShow] = useState(false);
 	const [toggleState, setToggleState] = useState(false);
 	const [acceptList, setAcceptList] = useState([]);
 
+	const [isChanged, setIsChanged] = useState(false);
+
 	// 로그인 한 유저가 aceept 되어있는 목록
+
+	useEffect(() => {
+		let getInfo = async function () {
+			const doc = await db.collection("user").doc(uid).get();
+			setUserInfo(doc.data());
+		};
+		getInfo();
+	}, []);
 
 	const onInfoChange = (e, key) => {
 		const cp = { ...inputValue };
@@ -42,10 +54,9 @@ const ChatMain = () => {
 			setChatrooms(querySnapshot.docs.map((doc) => doc.data()));
 		};
 		setting();
-	}, [toggleState]);
+	}, [isChanged, toggleState]);
 
 	useEffect(() => {
-		console.log("toggle~");
 		const getAcceptList = async function (req, res) {
 			let cp = await db
 				.collection("user")
@@ -140,30 +151,38 @@ const ChatMain = () => {
 
 	const deleteRoom = async (e) => {
 		const deleteId = e.target.value;
-		const doc = await db.collection("chatrooms").doc(deleteId).get();
-		const deletePassword = doc.data().password;
-		if (email === doc.data().host) {
-			const answer = prompt("비밀번호를 입력해주세요.");
-			if (answer === deletePassword) {
-				const cp = chatrooms.filter(function (element) {
-					return element.id !== deleteId;
-				});
-				setChatrooms(cp);
-				console.log("delete?");
-				console.log(deleteId);
-				console.log(chatrooms);
-				await db.collection("chatrooms").doc(deleteId).delete();
-				alert("삭제되었습니다.");
+		try {
+			const doc = await db.collection("chatrooms").doc(deleteId).get();
+			const deletePassword = doc.data().password;
+			if (email === doc.data().host) {
+				const answer = prompt("비밀번호를 입력해주세요.");
+				if (answer === deletePassword) {
+					await db
+						.collection("chatrooms")
+						.doc(deleteId)
+						.delete()
+						.then(() => {
+							const cp = chatrooms.filter(function (element) {
+								return element.id !== deleteId;
+							});
+							// setChatrooms(cp);
+							alert("삭제되었습니다.");
+							console.log("삭제");
+						});
+					await setIsChanged(!isChanged);
+					console.log(chatrooms);
+				} else {
+					alert("비밀번호가 틀렸습니다.");
+				}
 			} else {
-				alert("비밀번호가 틀렸습니다.");
+				alert("작성자만 삭제할 수 있습니다.");
 			}
-		} else {
-			alert("작성자만 삭제할 수 있습니다.");
+		} catch (error) {
+			alert("이미 삭제된 방입니다.");
 		}
 	};
 
 	const acceptInvite = async function (rid, uid, setWRoom, setARoom) {
-		console.log("haha");
 		// 먼저 방에 있는 거 뺴기.
 		try {
 			const cp_room = await db
@@ -180,7 +199,6 @@ const ChatMain = () => {
 			const cp_wList = await wList.filter(function (element) {
 				return element !== uid;
 			});
-			console.log(cp_wList);
 
 			// 수락 리스트에 더하기.
 			const cp_aList = [...aList, uid];
@@ -235,8 +253,6 @@ const ChatMain = () => {
 	};
 
 	const rejectInvite = async function (rid, uid, setWRoom, setRRoom) {
-		console.log(rid);
-
 		try {
 			const cp_room = await db
 				.collection("chatrooms")
@@ -328,7 +344,14 @@ const ChatMain = () => {
 			</div>
 			<div className="chatListHeader">
 				<h1>Chat Chat Chat</h1>
-				<h4>{email.slice(0, email.indexOf("@"))}님 환영합니다.</h4>
+				<div className="mainInfoWrapper">
+					<img
+						alt="mainProfile"
+						className="mainProfile"
+						src={userInfo.imgUrl}
+					/>
+					<h4>{userInfo.nickName}님 환영합니다.</h4>
+				</div>
 			</div>
 
 			<div>
@@ -372,6 +395,7 @@ const ChatMain = () => {
 					return (
 						<ChatRoom
 							chatroom={chatroom}
+							chatrooms={chatrooms}
 							index={index}
 							key={index}
 							uid={uid}

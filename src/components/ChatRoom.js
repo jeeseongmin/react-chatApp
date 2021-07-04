@@ -9,14 +9,29 @@ const ChatRoom = (props) => {
 	// props로 받아오는 해당 room information
 	const chatroomInfo = props.chatroom;
 	const uid = props.uid;
+	const chatrooms = props.chatrooms;
 
 	// props로 받아오는 delete 함수
 	const deleteOne = props.deleteOne;
-
 	const enterRoom = props.enterRoom;
-
 	const acceptRooms = props.acceptRooms;
 
+	const [nickName, setNickName] = useState();
+
+	useEffect(() => {
+		let getHostName = async function () {
+			try {
+				const info = await db
+					.collection("user")
+					.doc(chatroomInfo.uidOfUser)
+					.get();
+				setNickName(info.data().nickName);
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		getHostName();
+	}, []);
 	// 맨 앞 index 표시
 	const index = props.index * 1 + 1;
 	const LockBadge = (e) => {
@@ -51,9 +66,7 @@ const ChatRoom = (props) => {
 			</Badge>
 			<LockBadge isLock={chatroomInfo.password} rid={chatroomInfo.id} />
 			<div className="chatRoomTitle">{chatroomInfo.title}</div>
-			<div className="chatRoomTitle">
-				{chatroomInfo.host.slice(0, chatroomInfo.host.indexOf("@"))}님의 채팅방
-			</div>
+			<div className="chatRoomTitle">{nickName}님의 채팅방</div>
 			<div className="btnWrapper">
 				<Button
 					variant="primary"
@@ -86,11 +99,15 @@ const ChatRoom = (props) => {
 
 // 삭제했을 때에는 memo에 어떻게 적용시켜야 할까?
 const areEqual = (prevProps, nextProps) => {
+	console.log("props");
 	console.log(prevProps);
+
+	console.log(nextProps);
 	return (
 		prevProps.content === nextProps.content &&
 		prevProps.id === nextProps.id &&
-		prevProps.acceptRooms === nextProps.acceptRooms
+		prevProps.acceptRooms === nextProps.acceptRooms &&
+		prevProps.chatrooms === nextProps.chatrooms
 	);
 };
 

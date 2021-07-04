@@ -23,6 +23,59 @@
 	border-radius: 10px;
 	background-color: white;
 }
+.signUpWrapper {
+	height: 42rem;
+}
+.signUpHedaer {
+	width: 100%;
+	text-align: center;
+}
+.signUpDiv {
+	width: 100%;
+}
+.nickNameInput {
+	width: 60% !important;
+}
+.viewNickNameCheck {
+	font-size: 0.5rem;
+	font-weight: bold;
+	padding-left: 0.5rem;
+	margin: 0;
+	margin-bottom: 0.5rem;
+	color: var(--red-color);
+}
+.isUnique {
+	color: var(--main2-color);
+}
+.signUpProfileWrapper {
+	width: 100%;
+	text-align: center;
+}
+.profilePreviewWrapper {
+	width: 100%;
+	height: auto;
+	text-align: center;
+	background-color: "#efefef";
+}
+.profilePreview {
+	width: 7rem;
+	height: 7rem;
+	border: 1px solid #e3e3e3;
+	border-radius: 100px;
+	object-fit: cover;
+}
+.profileUploadBtnWrapper {
+	width: 100%;
+	margin-bottom: 1rem;
+}
+.profileUploadBtn {
+	margin: 0 0.5rem;
+	font-size: 0.75rem;
+	font-weight: bold;
+}
+.profileImg {
+	visibility: hidden;
+}
 
 .loginInput {
 	border-style: none;
@@ -156,7 +209,7 @@
 }
 
 .emptyChatBox {
-	height: 7rem;
+	height: 10rem;
 }
 .chatBox:hover {
 	background-color: var(--main2-color);
@@ -191,6 +244,8 @@
 	text-align: left;
 }
 
+/* mainPage */
+
 .chatListWrapper {
 	background-color: var(--background-color);
 }
@@ -204,6 +259,21 @@
 	justify-content: flex-start !important;
 	/* flex-wrap: wrap; */
 	flex-direction: column;
+}
+.mainProfile {
+	width: 3rem;
+	height: 3rem;
+	border: 1px solid #e3e3e3;
+	border-radius: 100px;
+	object-fit: cover;
+	margin-right: 1rem;
+}
+.mainInfoWrapper {
+	/* width: 100%; */
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
 }
 .idBadge {
 	padding: 1.25rem 1.5rem;
@@ -293,7 +363,8 @@
 	background-color: none;
 	display: flex;
 	justify-content: flex-end;
-	margin-top: 1rem;
+	margin-top: 0rem;
+	padding-top: 3rem;
 	padding-right: 1rem;
 }
 .imojiOtherWrapper {
@@ -416,13 +487,6 @@
 	height: 13em;
 }
 
-.invite_userProfile {
-	width: 3rem;
-	height: 3rem;
-	font-size: 2rem;
-	line-height: 2rem;
-	padding: 0;
-}
 .invite_userName {
 	width: 70%;
 	margin: 0 1rem;
@@ -485,15 +549,7 @@
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
-.invite_userimg {
-	width: 100%;
-}
-.myDivBtnWrapper {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	width: 10rem;
-}
+
 .editRoomBtnWrapper {
 	display: flex;
 	flex-direction: row;
@@ -506,4 +562,38 @@
 }
 .notUseBtn {
 	cursor: none;
+}
+
+.myInvitationComp {
+	width: 100%;
+	display: flex;
+	flex-direciton: row;
+	align-items: center;
+}
+.myInvitationComp_room {
+	width: 90%;
+}
+.invite_userProfile {
+	width: 3rem;
+	height: 3rem;
+	font-size: 2rem;
+	line-height: 2rem;
+	padding: 0;
+	background-color: none;
+}
+.invite_userimg {
+	width: 3rem;
+	height: 3rem;
+	border: 1px solid #e3e3e3;
+	border-radius: 100px;
+	object-fit: cover;
+	margin-left: 0.5rem;
+	/* margin-right: 1rem; */
+}
+
+.myDivBtnWrapper {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 10rem;
 }
