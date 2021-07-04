@@ -332,18 +332,18 @@ const ChatMain = () => {
 			/>
 			<div className="logoutWrapper">
 				<Button
-					variant="success"
+					variant="warning"
 					className="inviteBtn"
 					onClick={() => setModalShow(true)}
 				>
 					내 알림
 				</Button>
-				<Button variant="secondary" onClick={logOut}>
+				<Button variant="dark" onClick={logOut}>
 					로그아웃
 				</Button>
 			</div>
 			<div className="chatListHeader">
-				<h1>Chat Chat Chat</h1>
+				<h1>Hello, World!</h1>
 				<div className="mainInfoWrapper">
 					<img
 						alt="mainProfile"
@@ -359,7 +359,7 @@ const ChatMain = () => {
 					<div>
 						<div>
 							<h4>
-								<b>채팅방 새로 만들기 : </b>
+								<b>채팅방 만들기 : </b>
 							</h4>
 						</div>
 						<div>

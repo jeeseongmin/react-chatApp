@@ -35,6 +35,7 @@ const Chat = (props) => {
 	const [scaryList, setScaryList] = useState([]);
 	const [scaryChange, setScaryChange] = useState(false);
 
+	const [userInfo, setUserInfo] = useState({});
 	function test(text) {
 		console.log(text);
 	}
@@ -148,9 +149,20 @@ const Chat = (props) => {
 		scary.getList();
 	}, [scaryChange]);
 
+	// 이모티콘 클릭 시 toggle 이벤트
 	const imojiToggle = function (type) {
 		type.toggle();
 	};
+
+	// 맨 처음
+	useEffect(() => {
+		let getUserInfo = async function () {
+			let userRef = await db.collection("user").doc(chat.uidOfUser).get();
+			const _user = userRef.data();
+			setUserInfo(_user);
+		};
+		getUserInfo();
+	}, []);
 
 	// 해당 chat에 아무 이모티콘도 존재하지 않을 때
 	function isEmpty() {
@@ -165,15 +177,17 @@ const Chat = (props) => {
 
 	useEffect(() => {
 		let loadList = async function () {
-			const doc = await db
+			await db
 				.collection("chatrooms")
 				.doc(rid)
 				.collection("messages")
 				.doc(chat.docId)
-				.get();
-			setLikeList(doc.data().like);
-			setCutyList(doc.data().cuty);
-			setScaryList(doc.data().scary);
+				.get()
+				.then((doc) => {
+					setLikeList(doc.data().like);
+					setCutyList(doc.data().cuty);
+					setScaryList(doc.data().scary);
+				});
 		};
 		loadList();
 	}, []);
@@ -306,7 +320,16 @@ const Chat = (props) => {
 				)}
 				<div className="messageWrapper myChat">
 					<div>
-						<div className="chatSender">{hostName}</div>
+						<div className="chatSender">
+							<span>
+								<b>{hostName}</b>
+								<img
+									alt="guest"
+									src={userInfo.imgUrl}
+									className="chatProfile_right"
+								/>
+							</span>
+						</div>
 						<span className="chatMessage">{chat.content}</span>
 						<div className="imojiView">
 							<ImojiViewBtn type={like} typeList={likeList} typeImg={likeImg} />
@@ -376,7 +399,16 @@ const Chat = (props) => {
 				)}
 				<div className="messageWrapper otherChat">
 					<div>
-						<div className="chatSender">{hostName}</div>
+						<div className="chatSender">
+							<span>
+								<img
+									alt="guest"
+									src={userInfo.imgUrl}
+									className="chatProfile_left"
+								/>
+								<b>{hostName}</b>
+							</span>
+						</div>
 						<span className="chatMessage">{chat.content}</span>
 						<div className="imojiView">
 							<ImojiViewBtn type={like} typeList={likeList} typeImg={likeImg} />

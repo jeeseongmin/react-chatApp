@@ -23,12 +23,11 @@ const ChatRoomMain = () => {
 	const [chats, setChats] = useState([]);
 	const [modifyCandidate, setModifyCandidate] = useState(null);
 	const [newCandidate, setNewCandidate] = useState(null);
-	const [hostName, setHostName] = useState();
+	const [userInfo, setUserInfo] = useState({});
 
 	const [modalShow, setModalShow] = useState(false);
 
 	const [editModalShow, setEditModalShow] = useState(false);
-
 	const [isChanged, setIsChanged] = useState(false);
 
 	// 맨 처음에 정보들 받아올 때.
@@ -175,6 +174,21 @@ const ChatRoomMain = () => {
 		onChange();
 	}, []);
 
+	// 맨 처음
+	// useEffect(() => {
+	// 	console.log(roomInfo);
+	// 	let getUserInfo = async function () {
+	// 		try {
+	// 			let userRef = await db.collection("user").doc(roomInfo.uidOfUser).get();
+	// 			const _user = userRef.data();
+	// 			setUserInfo(_user);
+	// 		} catch (error) {
+	// 			console.log(error);
+	// 		}
+	// 	};
+	// 	getUserInfo();
+	// }, []);
+
 	return (
 		<div className="chatRoomMainWrapper">
 			<EditRoomModal
@@ -214,7 +228,13 @@ const ChatRoomMain = () => {
 				</div>
 			)}
 			<h1>
-				{roomInfo.title} <Badge variant="primary">On</Badge>
+				<Badge
+					variant={roomInfo.password === "" ? "success" : "secondary"}
+					className="roomTypeBadge"
+				>
+					{roomInfo.password === "" ? "Public" : "Private"}
+				</Badge>
+				{roomInfo.title}
 			</h1>
 			<h3>호스트 : {roomInfo.host}</h3>
 			<div className="chat-area" ref={chatBox}>

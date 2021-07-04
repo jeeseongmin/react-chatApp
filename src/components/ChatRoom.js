@@ -17,6 +17,7 @@ const ChatRoom = (props) => {
 	const acceptRooms = props.acceptRooms;
 
 	const [nickName, setNickName] = useState();
+	const [imgUrl, setImgUrl] = useState();
 
 	useEffect(() => {
 		let getHostName = async function () {
@@ -26,6 +27,7 @@ const ChatRoom = (props) => {
 					.doc(chatroomInfo.uidOfUser)
 					.get();
 				setNickName(info.data().nickName);
+				setImgUrl(info.data().imgUrl);
 			} catch (error) {
 				console.log(error);
 			}
@@ -37,8 +39,13 @@ const ChatRoom = (props) => {
 	const LockBadge = (e) => {
 		const info = e.isLock;
 		const rid = e.rid;
-
-		if (acceptRooms.includes(rid) || chatroomInfo.uidOfUser === uid) {
+		if (chatroomInfo.password === "") {
+			return (
+				<Badge variant="success" className="lockBadge">
+					Public
+				</Badge>
+			);
+		} else if (acceptRooms.includes(rid) || chatroomInfo.uidOfUser === uid) {
 			return (
 				<Badge variant="success" className="lockBadge">
 					Accept
@@ -46,14 +53,8 @@ const ChatRoom = (props) => {
 			);
 		} else if (info) {
 			return (
-				<Badge variant="danger" className="lockBadge">
-					Lock
-				</Badge>
-			);
-		} else {
-			return (
-				<Badge variant="success" className="lockBadge">
-					unLock
+				<Badge variant="secondary" className="lockBadge">
+					Private
 				</Badge>
 			);
 		}
@@ -65,8 +66,15 @@ const ChatRoom = (props) => {
 				{index}
 			</Badge>
 			<LockBadge isLock={chatroomInfo.password} rid={chatroomInfo.id} />
-			<div className="chatRoomTitle">{chatroomInfo.title}</div>
-			<div className="chatRoomTitle">{nickName}님의 채팅방</div>
+			<div className="chatRoomContentWrapper">
+				<span className="myInvitationImgWrapper">
+					<img alt="guest" src={imgUrl} className="chatRoomProfile" />
+				</span>
+				{nickName}님의 채팅방
+			</div>
+			<div className="chatRoomContentWrapper chatRoomTitle">
+				{chatroomInfo.title}
+			</div>
 			<div className="btnWrapper">
 				<Button
 					variant="primary"
@@ -99,10 +107,6 @@ const ChatRoom = (props) => {
 
 // 삭제했을 때에는 memo에 어떻게 적용시켜야 할까?
 const areEqual = (prevProps, nextProps) => {
-	console.log("props");
-	console.log(prevProps);
-
-	console.log(nextProps);
 	return (
 		prevProps.content === nextProps.content &&
 		prevProps.id === nextProps.id &&

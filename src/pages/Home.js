@@ -40,7 +40,7 @@ const Home = () => {
 		<div className="Wrapper">
 			<div className="loginWrapper">
 				<h2>
-					<b>Chat Chat Chat</b>
+					<b>Hello, world!</b>
 				</h2>
 				<form onSubmit={handleSubmit}>
 					<div>
