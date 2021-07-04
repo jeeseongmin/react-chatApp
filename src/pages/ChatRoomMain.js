@@ -89,18 +89,22 @@ const ChatRoomMain = () => {
 			cuty: [],
 			scary: [],
 		};
-		const doc = await db
-			.collection("chatrooms")
-			.doc(rid)
-			.collection("messages")
-			.add(payload);
-		// message 창 초기화
-		payload.docId = doc.id;
-		const cp = [...chats];
-		cp.push(payload);
-		setChats(cp);
-		setText("");
-		scrollToBottom();
+		try {
+			const doc = await db
+				.collection("chatrooms")
+				.doc(rid)
+				.collection("messages")
+				.add(payload);
+			// message 창 초기화
+			payload.docId = doc.id;
+			const cp = [...chats];
+			cp.push(payload);
+			setChats(cp);
+			setText("");
+			scrollToBottom();
+		} catch (error) {
+			console.log(error);
+		}
 	};
 
 	useEffect(() => {
@@ -111,14 +115,11 @@ const ChatRoomMain = () => {
 	}, [newCandidate]);
 
 	const deleteChat = async (chat) => {
+		console.log("chat");
+		console.log(chat);
 		if (uid === chat.uidOfUser || uid === roomInfo.uidOfUser) {
 			const deleteId = chat.id;
-			const cp = chats.filter(function (element, index) {
-				if (index !== 0) {
-					return element.id !== deleteId;
-				} else return true;
-			});
-			setChats(cp);
+
 			try {
 				// alert(rid + " 성공적! " + chat.docId);
 				await db
@@ -126,7 +127,21 @@ const ChatRoomMain = () => {
 					.doc(rid)
 					.collection("messages")
 					.doc(chat.docId)
-					.delete();
+					.delete()
+					.then(() => {
+						const cp = chats.filter(function (element, index) {
+							console.log(element);
+							// console.log(element.id + " : " + deleteId);
+							if (index !== 0) {
+								return element.id !== deleteId;
+							} else return true;
+						});
+						console.log("cp");
+						console.log(cp);
+						setChats(cp);
+					});
+				await setIsChanged(!isChanged);
+
 				// setIsChanged(!isChanged);
 			} catch (error) {
 				console.log(error);
@@ -150,6 +165,7 @@ const ChatRoomMain = () => {
 				.get();
 
 			snapshot.docChanges().forEach((change) => {
+				console.log(change.type);
 				// 새로운 data일 때
 				if (change.type === "added") {
 					const newEntry = change.doc.data();
@@ -255,7 +271,6 @@ const ChatRoomMain = () => {
 					}
 				})}
 			</div>
-
 			<div className="sendMessageWrapper">
 				<input
 					type="text"
