@@ -45,6 +45,9 @@ const EditChatModal = (props) => {
 					uidOfUser: editChat.uidOfUser,
 					created: editChat.created,
 					edited: firebase.firestore.Timestamp.now().seconds,
+					like: [],
+					cuty: [],
+					scary: [],
 				};
 				// console.log(payload);
 				await db
@@ -55,10 +58,7 @@ const EditChatModal = (props) => {
 					.set(payload)
 					.then(() => {
 						// alert("수정되었습니다.");
-						setChatInfo({
-							...payload,
-							docId: chat.docId,
-						});
+						setChatInfo(payload);
 						setEditChat({
 							content: "",
 						});
