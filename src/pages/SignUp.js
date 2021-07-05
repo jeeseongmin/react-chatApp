@@ -74,8 +74,13 @@ const SignUp = () => {
 			return 0;
 		} else if (password.value !== passwordCheck.value) {
 			alert("비밀번호를 동일하게 입력해주세요.");
+			return 0;
 		} else if (!nickNameCheck) {
 			alert("중복된 닉네임입니다.");
+			return 0;
+		} else if (!imgFile) {
+			alert("이미지 파일이 없습니다!");
+			return 0;
 		} else {
 			try {
 				await firebaseApp

@@ -59,11 +59,22 @@ const ChatRoomMain = () => {
 		history.goBack();
 	};
 
+	// const scrollToBottom = () => {
+	// 	// console.log('box: ', box);
+	// 	const { scrollHeight, clientHeight, scrollTop } = chatBox.current;
+	// 	chatBox.current.scrollTop = scrollHeight * 2 - clientHeight;
+	// };
+
+	const messagesEndRef = useRef(null);
+
 	const scrollToBottom = () => {
-		// console.log('box: ', box);
-		const { scrollHeight, clientHeight, scrollTop } = chatBox.current;
-		chatBox.current.scrollTop = scrollHeight - clientHeight;
+		console.log(messagesEndRef.current);
+		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	};
+
+	useEffect(() => {
+		scrollToBottom();
+	});
 	/* 
 		message를 보내면, chats 이라는 collection에 추가하고, 
 		_roomId를 가지는 chatrooms의 message에도 추가한다.
@@ -101,7 +112,7 @@ const ChatRoomMain = () => {
 			cp.push(payload);
 			setChats(cp);
 			setText("");
-			scrollToBottom();
+			// scrollToBottom();
 		} catch (error) {
 			console.log(error);
 		}
@@ -111,6 +122,7 @@ const ChatRoomMain = () => {
 		const cp = [...chats];
 		cp.push(newCandidate);
 		setChats(cp);
+		// scrollToBottom();
 		// scrollToBottom();
 	}, [newCandidate]);
 
@@ -154,6 +166,7 @@ const ChatRoomMain = () => {
 	};
 
 	useEffect(() => {
+		// scrollToBottom();
 		// 초기화를 해줘야 쌓이지 않는다.
 		// setChats([]);
 		let onChange = async function () {
@@ -270,6 +283,7 @@ const ChatRoomMain = () => {
 						);
 					}
 				})}
+				<div ref={messagesEndRef} />
 			</div>
 			<div className="sendMessageWrapper">
 				<input
